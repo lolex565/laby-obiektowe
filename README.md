@@ -23,5 +23,5 @@ Logike najłatwiej wzią z matmy z filmików primera, (https://www.youtube.com/@
 
 ## grupa członkowie
 
-- Bedryło Miłosz - lider bo nie boje się już gada z ludźmi
+- Bedryło Miłosz - lider bo nie boje się już gadać z ludźmi
 - Kręgiel Artur
