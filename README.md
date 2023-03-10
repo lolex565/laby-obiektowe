@@ -16,6 +16,7 @@ Nasz stack:
 - symulacja pandemii
 - symulacja rozrostu miasta
 - symulacja wojny
+- game of life conwaya(możliwe jakieś dodatkowe zasady)
 
 ## logika
 
