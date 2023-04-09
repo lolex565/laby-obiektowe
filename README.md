@@ -20,7 +20,7 @@ Nasz stack:
 
 ## logika
 
-Logike najłatwiej wzią z matmy z filmików primera, (https://www.youtube.com/@PrimerBlobs).
+Logike najłatwiej wziąć z matmy z filmików primera, (https://www.youtube.com/@PrimerBlobs).
 
 ## grupa członkowie
 
