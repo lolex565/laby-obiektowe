@@ -68,7 +68,7 @@ GENDER_FEMALE = False
 class Animal(Object):
     def __init__(self, x: int, y: int, weight: float, speed: int,
                  age: int, thirst: int, satiety: int, gender: bool, view_range: int,
-                 hit_points: int, strenght: int) -> None:
+                strenght: int, hit_points: int = 100) -> None:
         super().__init__(x, y, weight)
         self.__speed = speed
         self.__age = age
@@ -133,8 +133,29 @@ class Animal(Object):
         """Zwiększa poziom sytości zwierzęcia o wagę wody"""
         self.__thirst += water.get_weight() % 100
 
-    def reproduce(self, partner: Animal) -> Animal:
-        """Tworzy nowe zwierzę na podstawie dwóch rodziców"""
+    def can_reproduce_with(self, partner: Animal) -> bool:
+        """Zwraca True, jeśli zwierzęta mogą się rozmnażać"""
+        if type(self).__name__ == type(partner).__name__:
+            if self.get_gender() != self.get_gender():
+                return True
+        return False
+
+    def get_durability(self) -> int:
+        """Zwraca trwałość atrybutu ataku lub obrony zwierzęcia"""
+        pass
+
+    def set_durability(self, damage_points: int) -> int:
+        """Zadaje zwierzęciu obrażenia"""
+        pass
+
+    def set_damage(self, points: int) -> None:
+        """Zadaje zwierzęciu obrażenia"""
+        points = self.set_durability(points)
+        self.__hit_points -= points
+        self.__hit_points = max(self.__hit_points, 0)
+
+    def make_sound(self) -> int:
+        """Zwraca głośność wydawanego przez zwierzę dźwięku"""
         pass
 
 
@@ -147,7 +168,7 @@ class Beaver(Animal):
         super().__init__(x, y, weight, speed, age, thirst, satiety, gender, view_range,
                          hit_points, strenght)
         
-    def eat(tree: Tree) -> None:
+    def eat(self, tree: Tree) -> None:
         """Zjada drzewo"""
         self.__satiety += (tree.get_weight() * tree.get_energy()) % 100
         self.__teeth_durability -= tree.get_durability() / 100
@@ -155,6 +176,17 @@ class Beaver(Animal):
     def get_teeth_durability(self) -> int:
         """Zwraca trwałość zębów"""
         return self.__teeth_durability
+    
+    def set_durability(self, damage_points: int) -> int:
+        """Zadaje zwierzęciu obrażenia"""
+        points = self.__teeth_durability - damage_points
+        self.__teeth_durability -= damage_points
+        self.__teeth_durability = max(self.__teeth_durability, 0)
+        return max(points, 0)
+    
+    def get_durability(self) -> int:
+        """Zwraca trwałość atrybutu ataku lub obrony zwierzęcia"""
+        return self.get_teeth_durability()
     
 
 class Predator(Animal):
@@ -213,6 +245,16 @@ class Wolf(Predator):
         """Zwraca trwałość pazurów"""
         return self.__claws_durability
     
+    def get_durability(self) -> int:
+        return self.get_claws_durability()
+    
+    def set_durability(self, damage_points: int) -> int:
+        """Zadaje zwierzęciu obrażenia"""
+        points = self.__claws_durability - damage_points
+        self.__claws_durability -= damage_points
+        self.__claws_durability = max(self.__claws_durability, 0)
+        return max(points, 0)
+    
 class Eagle(Predator):
     __beak_durability = 100
 
@@ -230,6 +272,16 @@ class Eagle(Predator):
         """Zwraca trwałość dzioba"""
         return self.__beak_durability
     
+    def get_durability(self) -> int:
+        return self.get_beak_durability()
+    
+    def set_durability(self, damage_points: int) -> int:
+        """Zadaje zwierzęciu obrażenia"""
+        points = self.__beak_durability - damage_points
+        self.__beak_durability -= damage_points
+        self.__beak_durability = max(self.__beak_durability, 0)
+        return max(points, 0)
+    
 class Mouse(Prey):
 
     def __init__(self, x: int, y: int, weight: float, speed: int,
@@ -241,6 +293,12 @@ class Mouse(Prey):
     def squeak(self) -> int:
         """Wydać dźwięk"""
         pass
+
+    def get_durability(self) -> int:
+        return 0
+    
+    def set_durability(self, damage_points: int) -> int:
+        return damage_points
 
 
 class Deer(Prey):
@@ -259,6 +317,16 @@ class Deer(Prey):
     def get_antlers_durability(self) -> int:
         """Zwraca trwałość poroża"""
         return self.__antlers_durability
+    
+    def get_durability(self) -> int:
+        return self.get_antlers_durability()
+    
+    def set_durability(self, damage_points: int) -> int:
+        """Zadaje zwierzęciu obrażenia"""
+        points = self.__antlers_durability - damage_points
+        self.__antlers_durability -= damage_points
+        self.__antlers_durability = max(self.__antlers_durability, 0)
+        return max(points, 0)
     
 
 ###### BOARD ######
