@@ -142,11 +142,11 @@ class Animal(Object):
 
     def get_durability(self) -> int:
         """Zwraca trwałość atrybutu ataku lub obrony zwierzęcia"""
-        pass
+        return 0
 
     def set_durability(self, damage_points: int) -> int:
         """Zadaje zwierzęciu obrażenia"""
-        pass
+        return damage_points
 
     def set_damage(self, points: int) -> None:
         """Zadaje zwierzęciu obrażenia"""
@@ -156,7 +156,7 @@ class Animal(Object):
 
     def make_sound(self) -> int:
         """Zwraca głośność wydawanego przez zwierzę dźwięku"""
-        pass
+        return 0
 
 
 class Beaver(Animal):
@@ -179,7 +179,7 @@ class Beaver(Animal):
     
     def set_durability(self, damage_points: int) -> int:
         """Zadaje zwierzęciu obrażenia"""
-        points = self.__teeth_durability - damage_points
+        points = damage_points - self.__teeth_durability
         self.__teeth_durability -= damage_points
         self.__teeth_durability = max(self.__teeth_durability, 0)
         return max(points, 0)
@@ -206,6 +206,9 @@ class Predator(Animal):
         """Atakuje ofiarę"""
         pass
 
+    def make_sound(self) -> int:
+        return self.get_anger() + self.get_weight() + self.get_strenght()
+
 
 class Prey(Animal):
     def __init__(self, x: int, y: int, weight: float, speed: int,
@@ -227,6 +230,9 @@ class Prey(Animal):
         """Obronić się przed drapieżnikiem"""
         pass
 
+    def make_sound(self) -> int:
+        return self.get_fear() + self.get_weight() + self.get_strenght()
+
 
 class Wolf(Predator):
     __claws_durability = 100
@@ -239,7 +245,7 @@ class Wolf(Predator):
         
     def roar(self) -> int:
         """Wydać dźwięk"""
-        pass
+        return 20
 
     def get_claws_durability(self) -> int:
         """Zwraca trwałość pazurów"""
@@ -250,10 +256,13 @@ class Wolf(Predator):
     
     def set_durability(self, damage_points: int) -> int:
         """Zadaje zwierzęciu obrażenia"""
-        points = self.__claws_durability - damage_points
+        points = damage_points - self.__claws_durability
         self.__claws_durability -= damage_points
         self.__claws_durability = max(self.__claws_durability, 0)
         return max(points, 0)
+    
+    def make_sound(self) -> int:
+        return super().make_sound() + self.roar()
     
 class Eagle(Predator):
     __beak_durability = 100
@@ -266,7 +275,7 @@ class Eagle(Predator):
         
     def screech(self) -> int:
         """Wydać dźwięk"""
-        pass
+        return 10
 
     def get_beak_durability(self) -> int:
         """Zwraca trwałość dzioba"""
@@ -277,10 +286,13 @@ class Eagle(Predator):
     
     def set_durability(self, damage_points: int) -> int:
         """Zadaje zwierzęciu obrażenia"""
-        points = self.__beak_durability - damage_points
+        points = damage_points - self.__beak_durability
         self.__beak_durability -= damage_points
         self.__beak_durability = max(self.__beak_durability, 0)
         return max(points, 0)
+    
+    def make_sound(self) -> int:
+        return super().make_sound() + self.screech()
     
 class Mouse(Prey):
 
@@ -292,13 +304,16 @@ class Mouse(Prey):
         
     def squeak(self) -> int:
         """Wydać dźwięk"""
-        pass
+        return 1
 
     def get_durability(self) -> int:
         return 0
     
     def set_durability(self, damage_points: int) -> int:
         return damage_points
+    
+    def make_sound(self) -> int:
+        return super().make_sound() + self.squeak()
 
 
 class Deer(Prey):
@@ -312,7 +327,7 @@ class Deer(Prey):
         
     def yell(self) -> int:
         """Wydać dźwięk"""
-        pass
+        return 10
 
     def get_antlers_durability(self) -> int:
         """Zwraca trwałość poroża"""
@@ -323,10 +338,13 @@ class Deer(Prey):
     
     def set_durability(self, damage_points: int) -> int:
         """Zadaje zwierzęciu obrażenia"""
-        points = self.__antlers_durability - damage_points
+        points = damage_points - self.__antlers_durability
         self.__antlers_durability -= damage_points
         self.__antlers_durability = max(self.__antlers_durability, 0)
         return max(points, 0)
+    
+    def make_sound(self) -> int:
+        return super().make_sound() + self.yell()
     
 
 ###### BOARD ######
