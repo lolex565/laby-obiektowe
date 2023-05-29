@@ -1,3 +1,18 @@
+from copy import deepcopy
+from random import randint, choice
+
+"""
+TODO:
+
+    - [ ] zaimplementować metody planszy odpowiedzialne za właściwe działanie symulacji
+    - [ ] podzielić plik na mniejsze i ustrukturyzować
+    - [ ] dodać komentarze
+    - [ ] dodać testy
+    - [ ] dodać dokumentację
+    - [ ]stworzyć interfejs graficzny
+
+"""
+
 ####### OBJECTS #######
 
 class Object:
@@ -13,6 +28,12 @@ class Object:
     def get_weight(self) -> tuple:
         """Zwraca wagę obiektu"""
         return self.__weight
+    
+    def __str__(self) -> str:
+        return str(type(self).__name__)
+    
+    def __repr__(self) -> str:
+        return self.__str__()
     
 
 ####### ITEMS #######
@@ -52,10 +73,10 @@ class Tree(Item):
         super().__init__(x, y, weight, energy, durability)
 
 
-class Rock(Item):
-    def __init__(self, x: int, y: int, weight: float, energy: int,
-                 durability: int) -> None:
-        super().__init__(x, y, weight, energy, durability)
+# class Rock(Item):
+#     def __init__(self, x: int, y: int, weight: float, energy: int,
+#                  durability: int) -> None:
+#         super().__init__(x, y, weight, energy, durability)
 
 
 ####### ANIMALS #######
@@ -204,7 +225,11 @@ class Predator(Animal):
     
     def hunt(self, prey: Prey) -> None:
         """Atakuje ofiarę"""
-        pass
+        self.__anger += prey.make_sound()
+
+    def attack(self, prey: Prey) -> None:
+        """Zadaje obrażenia"""
+        prey.set_damage(self.get_strenght() + self.get_weight() + self.get_anger())
 
     def make_sound(self) -> int:
         return self.get_anger() + self.get_weight() + self.get_strenght()
@@ -224,11 +249,11 @@ class Prey(Animal):
     
     def run(self, predator: Predator) -> None:
         """Ucieka przed drapieżnikiem"""
-        pass
+        self.__fear += predator.make_sound()
 
     def defend(self, predator: Predator) -> None:
         """Obronić się przed drapieżnikiem"""
-        pass
+        predator.set_damage(self.get_strenght() + self.get_weight() + self.get_fear())
 
     def make_sound(self) -> int:
         return self.get_fear() + self.get_weight() + self.get_strenght()
@@ -371,6 +396,22 @@ class Board:
     __grid = []
     __objects = set()
     __round = 0
+    __size = None
+
+    __possible_animals = {
+        "Mouse": Mouse,
+        "Deer": Deer,
+        "Wolf": Wolf,
+        "Eagle": Eagle,
+        "Beaver": Beaver
+    }
+
+    __possible_items = {
+        "Tree": Tree,
+        # "Rock": Rock,
+        "Plant": Plant,
+        "Water": Water
+    }
 
     def __init__(self, size: BoardSize) -> None:
         self.__size = size
@@ -394,15 +435,19 @@ class Board:
     
     def get_grid(self) -> list:
         """Zwraca planszę"""
-        return self.__grid
+        return deepcopy(self.__grid)
     
     def get_objects(self) -> set:
         """Zwraca zbiór wszystkich obiektów"""
-        return self.__objects.copy()
+        return deepcopy(self.__objects)
     
     def get_round(self) -> int:
         """Zwraca numer rundy"""
         return self.__round
+    
+    def add_random_object(self) -> None:
+        """Dodaje losowy obiekt"""
+        pass
     
     def populate(self, animal: Animal) -> None:
         """Dodaje zwierzę do planszy"""
