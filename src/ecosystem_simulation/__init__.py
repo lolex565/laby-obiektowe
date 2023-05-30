@@ -503,7 +503,7 @@ class Board:
             x=x,
             y=y,
             weight=uniform(0.1, 20),
-            speed=randint(1, 20),
+            speed=randint(1, 5),
             age=0,
             thirst=100,
             satiety=100,
@@ -516,6 +516,11 @@ class Board:
         )
 
         self.__grid[y][x] = animal
+
+        if issubclass(animal.__class__, Predator):
+            self.__predators += 1
+        if issubclass(animal.__class__, Prey):
+            self.__preys += 1
 
     def add_random_item(self) -> None:
         """Dodaje losowy przedmiot"""
@@ -544,13 +549,45 @@ class Board:
         x, y = obj.get_position()
         self.__grid[y][x] = None
 
+        if issubclass(obj.__class__, Predator):
+            self.__predators -= 1
+            self.__population -= 1
+        if issubclass(obj.__class__, Prey):
+            self.__preys -= 1
+            self.__population -= 1
+        if isinstance(obj, Beaver):
+            self.__population -= 1
+        self.__total_object_count -= 1
+            
+
+    def __scan_area_nearby(self, x: int, y: int, view_range: int) -> list:
+        """Skanuje okolicę"""
+        objests_nearby = []
+        for i in range(x - view_range, x + view_range + 1):
+            for j in range(y - view_range, y + view_range + 1):
+                    try:
+                        if self.__grid[j][i] is not None:
+                            objests_nearby.append(self.__grid[j][i])
+                    except IndexError:
+                        # indeks może wykorczyć poza zakres co spowoduje
+                        # wyrzucenie wyjątku. Jeśli wyjątek wystąpi,
+                        # wyłapujemy go i ignorujemy
+                        pass
+        return objests_nearby
+
     def update(self) -> None:
         """Aktualizuje stan planszy"""
-        pass
+        pass    # TODO: implement
 
     def check_end_conditions(self) -> bool:
         """Sprawdza warunki końcowe"""
-        pass
+        if self.__population == 0:
+            return True
+        if self.__predators == 0:
+            return True
+        if self.__preys == 0:
+            return True
+        return False
 
 
 if __name__ == "__main__":
