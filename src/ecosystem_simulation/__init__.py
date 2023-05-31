@@ -178,6 +178,10 @@ class Animal(Object):
     def set_satiety(self, satiety: int) -> None:
         """Ustawia poziom sytości zwierzęcia"""
         self.__satiety = satiety
+
+    def get_thirst(self) -> int:
+        """Zwraca poziom pragnienia zwierzęcia"""
+        return self.__thirst
     
     def get_gender(self) -> int:
         """Zwraca płeć zwierzęcia"""
@@ -197,10 +201,10 @@ class Animal(Object):
     
     def move(self, x: int, y: int) -> None:
         """Przesuwa zwierzę na podane współrzędne"""
-        energy_lost = (abs(self.get_position()[0] - x) + abs(self.get_position()[1] - y)) * (self.get_weight() + self.get_speed())
+        energy_lost = int((abs(self.get_position()[0] - x) + abs(self.get_position()[1] - y)) * (self.get_weight() + self.get_speed()))
         if self.__satiety == 0 or self.__thirst == 0:
             self.__hit_points -= energy_lost
-            self.__hit_points = max(self.__hit_points, 0)
+            self.__hit_points = int(max(self.__hit_points, 0))
         else:
             self.__satiety -= energy_lost
             self.__thirst -= energy_lost
@@ -235,9 +239,9 @@ class Animal(Object):
 
     def set_damage(self, points: int) -> None:
         """Zadaje zwierzęciu obrażenia"""
-        points = self.set_durability(points)
+        points = int(self.set_durability(points))
         self.__hit_points -= points
-        self.__hit_points = max(self.__hit_points, 0)
+        self.__hit_points = int(max(self.__hit_points, 0))
 
     def make_sound(self) -> int:
         """Zwraca głośność wydawanego przez zwierzę dźwięku"""
@@ -770,9 +774,11 @@ class Board:
                         break
                     elif isinstance(object_nearby, Water):
                         # print(f"{str(obj)}: Drink")
+                        if obj.get_thirst() >= 90:
+                            continue
                         if obj.get_position() == object_nearby.get_position():
                             obj.drink(object_nearby)
-                            self.remove(object_nearby)
+                            # self.remove(object_nearby)
                         else:
                             # TODO: make it DRY
                             distance = self.__calculate_range(*obj.get_position(), *object_nearby.get_position())
@@ -841,12 +847,12 @@ if __name__ == "__main__":
     print(predator.get_durability())
     print(predator.get_hit_points())
 
-    board = Board(BoardSize(10, 10))
+    board = Board(BoardSize(100, 100))
 
-    for _ in range(5):
+    for _ in range(50):
         board.add_random_animal()
 
-    for _ in range(5):
+    for _ in range(50):
         board.add_random_item()
 
     print(board)
@@ -857,8 +863,8 @@ if __name__ == "__main__":
         os.system(clear_screen_cmd)
         print(board)
         board.update()
-        # objects = list(sorted((f"{o}{o.get_position()}[hp={o.get_hit_points()}]" for o in board.get_objects())))
-        # print(objects)
+        objects = list(sorted((f"{o}{o.get_position()}[hp={o.get_hit_points()}]" for o in board.get_objects())))
+        print(objects)
         print("Population = ", board.get_population())
         print("Predators = ", board.get_predators())
         print("Preys = ", board.get_preys())
@@ -868,3 +874,9 @@ if __name__ == "__main__":
     # board.update()
     # print(board)
     print(board.get_objects())
+
+    s = set()
+    s.add(predator)
+    l = list(s)
+    print(predator in s)
+    print(predator in l)
