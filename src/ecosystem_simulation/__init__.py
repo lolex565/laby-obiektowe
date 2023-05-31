@@ -710,6 +710,8 @@ class Board:
                     continue
                 objects_nearby = sorted(self.__scan_area_nearby(*obj.get_position(), obj.get_view_range()), key=lambda o: self.__calculate_range(*obj.get_position(), *o.get_position()))
                 for object_nearby in objects_nearby:
+                    if object_nearby not in self.__objects:
+                        continue
                     if objects_nearby is obj:
                         continue
                     if issubclass(obj.__class__, Prey) and issubclass(object_nearby.__class__, Predator):
@@ -847,12 +849,12 @@ if __name__ == "__main__":
     print(predator.get_durability())
     print(predator.get_hit_points())
 
-    board = Board(BoardSize(100, 100))
+    board = Board(BoardSize(20, 20))
 
-    for _ in range(50):
+    for _ in range(10):
         board.add_random_animal()
 
-    for _ in range(50):
+    for _ in range(10):
         board.add_random_item()
 
     print(board)
