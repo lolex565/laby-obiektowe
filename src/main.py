@@ -21,14 +21,18 @@ if __name__ == "__main__":
 
     board = Board(BoardSize(20, 20))
 
+    # dodajemy zwierzęta
     for _ in range(50):
         board.add_random_animal()
 
+    # dodajemy obiekty nieożywione
     for _ in range(40):
         board.add_random_item()
 
     print(board)
 
+    # komenda czyszcząca ekran
+    # cls dla Windows, clear dla Linux/Unix
     clear_screen_cmd = "cls" if platform.system() == "Windows" else "clear"
 
     print(board)
@@ -36,17 +40,10 @@ if __name__ == "__main__":
         os.system(clear_screen_cmd)
         board.update()
         print(board)
-        # objects = list(sorted((f"{o}{o.get_position()}[hp={o.get_hit_points()}]" for o in board.get_objects())))
-        # print(objects)
         print("-" * board.get_size()[0])
         print("Populacja = ", board.get_population())
-        print("Drapieżniki = ", board.get_predators())
-        print("Ofiary = ", board.get_preys())
-        # input(f"End = {board.check_end_conditions()}")
+        print("Żywe drapieżniki = ", board.get_predators())
+        print("Żywe ofiary = ", board.get_preys())
         time.sleep(0.4)
     else:
         print(f"Przyczyna zakończenia symulacji: {end}")
-    
-    # board.update()
-    # print(board)
-    # print(board.get_objects())

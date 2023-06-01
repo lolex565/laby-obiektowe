@@ -6,14 +6,30 @@ from ecosystem_simulation.objects import Object
 from ecosystem_simulation.objects.items import Plant, Water
 
 
-GENDER_MALE = True
-GENDER_FEMALE = False
+GENDER_MALE = True      # płeć męska
+GENDER_FEMALE = False   # płeć żeńska
 
 
 class Animal(Object):
+    """Klasa bazowa dla wszystkich zwierząt w symulacji"""
+
     def __init__(self, x: int, y: int, weight: float, speed: int,
                  age: int, thirst: int, satiety: int, gender: bool, view_range: int,
                 strenght: int, hit_points: int = 100) -> None:
+        """Inicjalizuje zwierzę
+        
+        :param x: współrzędna x
+        :param y: współrzędna y
+        :param weight: waga zwierzęcia
+        :param speed: prędkość zwierzęcia
+        :param age: wiek zwierzęcia
+        :param thirst: poziom pragnienia zwierzęcia
+        :param satiety: poziom sytości zwierzęcia
+        :param gender: płeć zwierzęcia
+        :param view_range: zasięg widzenia zwierzęcia
+        :param strenght: siła zwierzęcia
+        :param hit_points: punkty życia zwierzęcia
+        """
         super().__init__(x, y, weight)
         self.__speed = speed
         self.__age = age
@@ -33,7 +49,10 @@ class Animal(Object):
         return self.__age
     
     def set_age(self, age: int) -> None:
-        """Ustawia wiek zwierzęcia"""
+        """Ustawia wiek zwierzęcia
+        
+        :param age: wiek zwierzęcia
+        """
         self.__age = age
     
     def get_satiety(self) -> int:
@@ -41,7 +60,10 @@ class Animal(Object):
         return self.__satiety
     
     def set_satiety(self, satiety: int) -> None:
-        """Ustawia poziom sytości zwierzęcia"""
+        """Ustawia poziom sytości zwierzęcia
+        
+        :param satiety: poziom sytości zwierzęcia
+        """
         self.__satiety = satiety
 
     def get_thirst(self) -> int:
@@ -65,7 +87,12 @@ class Animal(Object):
         return self.__strenght
     
     def move(self, x: int, y: int) -> None:
-        """Przesuwa zwierzę na podane współrzędne"""
+        """Przesuwa zwierzę na podane współrzędne
+        
+        :param x: współrzędna x
+        :param y: współrzędna y
+        """
+
         energy_lost = int((abs(self.get_position()[0] - x) + abs(self.get_position()[1] - y)) % 10)
         if self.__satiety == 0 or self.__thirst == 0:
             self.__hit_points -= energy_lost
@@ -78,15 +105,26 @@ class Animal(Object):
         self.set_position(x, y)
 
     def eat(self, food: Plant) -> None:
-        """Zwiększa poziom sytości zwierzęcia o wagę jedzenia"""
+        """Zjadanie rośliny przez zwierzę.
+        Zwiększa poziom sytości zwierzęcia o wagę rośliny
+        
+        :param food: roślina
+        """
         self.set_satiety((food.get_weight() * food.get_energy()) % 100)
 
     def drink(self, water: Water) -> None:
-        """Zwiększa poziom sytości zwierzęcia o wagę wody"""
+        """Picie wody przez zwierzę.
+        Zwiększa poziom nawodnienia zwierzęcia o wagę wody
+        
+        :param water: woda
+        """
         self.__thirst += water.get_weight() % 100
 
     def can_reproduce_with(self, partner) -> bool:
-        """Zwraca True, jeśli zwierzęta mogą się rozmnażać"""
+        """Zwraca True, jeśli zwierzęta mogą się rozmnażać
+        
+        :param partner: partner do rozmnażania
+        """
         if type(self).__name__ == type(partner).__name__:
             if self.get_gender() != self.get_gender():
                 if self.get_age() >= 5 and partner.get_age() >= 5:
@@ -99,11 +137,17 @@ class Animal(Object):
         return 0
 
     def set_durability(self, damage_points: int) -> int:
-        """Zadaje zwierzęciu obrażenia"""
+        """Zadaje zwierzęciu obrażenia
+        
+        :param damage_points: punkty obrażeń
+        """
         return damage_points
 
     def set_damage(self, points: int) -> None:
-        """Zadaje zwierzęciu obrażenia"""
+        """Zadaje zwierzęciu obrażenia
+        
+        :param points: punkty obrażeń
+        """
         points = int(self.set_durability(points))
         self.__hit_points -= points
         self.__hit_points = int(max(self.__hit_points, 0))
