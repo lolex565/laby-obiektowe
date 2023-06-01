@@ -1,6 +1,6 @@
 from copy import deepcopy
 from random import randint, choice, uniform
-import pickle, platform, os, math, time
+import pickle, platform, os, math, time, logging
 
 """
 TODO:
@@ -10,7 +10,10 @@ TODO:
     - [ ] dodać komentarze
     - [ ] dodać testy
     - [ ] dodać dokumentację
-    - [ ] stworzyć interfejs graficzny
+    - [ ] zamienić nazwy obiektów w siatce na emoji
+    - [ ] dodać możliwość zapisu i wczytywania stanu symulacji (pickle)
+    - [ ] dodać generowanie logów do pliku (logging)
+    - [ ] dodać metody dodawania osobno drapieżników, ofiar i bobrów
 
 """
 
@@ -67,10 +70,13 @@ def move_away_from_point(x: int, y: int, x2: int, y2: int, distance: int) -> tup
 ####### OBJECTS #######
 
 class Object:
+    __hashcode = None
+
     def __init__(self, x: int, y: int, weight: float) -> None:
         self.__x = x
         self.__y = y
         self.__weight = weight
+        self.__hashcode = id(self)
 
     def get_position(self) -> tuple:
         """Zwraca współrzędne obiektu"""
@@ -93,6 +99,9 @@ class Object:
     
     def get_hit_points(self):
         pass
+
+    def __hash__(self) -> int:
+        return self.__hashcode
     
 
 ####### ITEMS #######
@@ -201,7 +210,7 @@ class Animal(Object):
     
     def move(self, x: int, y: int) -> None:
         """Przesuwa zwierzę na podane współrzędne"""
-        energy_lost = int((abs(self.get_position()[0] - x) + abs(self.get_position()[1] - y)) * (self.get_weight() + self.get_speed()))
+        energy_lost = int((abs(self.get_position()[0] - x) + abs(self.get_position()[1] - y)) % 10)
         if self.__satiety == 0 or self.__thirst == 0:
             self.__hit_points -= energy_lost
             self.__hit_points = int(max(self.__hit_points, 0))
@@ -306,6 +315,7 @@ class Predator(Animal):
     
     def eat(self, prey: Animal) -> None:
         """Zjada ofiarę"""
+        satiety = self.get_satiety()
         satiety += int(prey.get_weight())
         self.set_satiety(max(satiety, 100))
         self.__anger -= int(prey.get_weight()) % 100
@@ -581,7 +591,7 @@ class Board:
             x=x,
             y=y,
             weight=uniform(0.1, 20),
-            speed=randint(1, 5 * (self.__size.get_area()) % 100 + 1),
+            speed=randint(1, 5) if issubclass(eval(species), Prey) else randint(6, 10),
             age=0,
             thirst=100,
             satiety=100,
@@ -650,20 +660,21 @@ class Board:
 
     def remove(self, obj) -> None:
         """Usuwa zwierzę z planszy"""
-        x, y = obj.get_position()
+        # if obj in self.__objects:
+        print(f"Usuwanie {obj} z planszy [{obj in self.__objects}]")
+        self.__objects.remove(obj)
+        print(f"Usunięto {obj} z planszy [{obj in self.__objects}]")
 
-        if obj in self.__objects:
-            self.__objects.remove(obj) 
-
-            if issubclass(obj.__class__, Predator):
-                self.__predators -= 1
-                self.__population -= 1
-            if issubclass(obj.__class__, Prey):
-                self.__preys -= 1
-                self.__population -= 1
-            if isinstance(obj, Beaver):
-                self.__population -= 1
-            self.__total_object_count -= 1
+        if issubclass(obj.__class__, Predator):
+            self.__predators -= 1
+            self.__population -= 1
+        if issubclass(obj.__class__, Prey):
+            self.__preys -= 1
+            self.__population -= 1
+        if isinstance(obj, Beaver):
+            self.__population -= 1
+        self.__total_object_count -= 1
+        del obj
 
     def __scan_area_nearby(self, x: int, y: int, view_range: int) -> list:
         """Skanuje okolicę"""
@@ -695,13 +706,24 @@ class Board:
         y = self.__size.get_size()[1] - 1 if y >= self.__size.get_size()[1] else y
         return (x, y)
     
+    def __move_towards_object(self, src: Animal, dst: Object) -> tuple:
+        """Przesuwa obiekt w kierunku innego obiektu"""
+        distance = self.__calculate_range(*src.get_position(), *dst.get_position())
+        if src.get_speed() >= distance:
+            x, y = dst.get_position()
+        else:
+            x, y = move_towards_point(*src.get_position(), *dst.get_position(), src.get_speed())
+            x, y = self.__correct_position(x, y)
+        # print(f"{str(src)}{src.get_position()}: Move towards {str(dst)}{dst.get_position()}")
+        return (x, y)
+    
     def update(self) -> None:
         """Aktualizuje stan planszy"""
         self.__round += 1
         self.__set_grid()
         for obj in list(self.__objects):
-            # if obj not in self.__objects:
-                # continue
+            if obj not in self.__objects:
+                continue
             if issubclass(obj.__class__, Animal):
                 x, y = obj.get_position()
                 if obj.get_hit_points() <= 0:
@@ -721,42 +743,36 @@ class Board:
                             continue
                         if obj.get_position() == object_nearby.get_position():
                             obj.defend(object_nearby)
+                            # print(f"{str(obj)}: Defend")
                         else:
                             x, y = obj.run(object_nearby)
                             x, y = self.__correct_position(x, y)
                             # obj.move(x, y)
+                            # print(f"{str(obj)}: Run")
                         break
                     elif issubclass(obj.__class__, Predator) and issubclass(object_nearby.__class__, Prey):
                         # print(f"{str(obj)}: Attack")
                         if obj.get_position() == object_nearby.get_position():
-                            if obj.get_hit_points() <= 0:
+                            if object_nearby.get_hit_points() <= 0:
                                 obj.eat(object_nearby)
                                 self.remove(object_nearby)
+                                # print(f"{str(obj)}: Eat")
                             else:
                                 obj.attack(object_nearby)
+                                # print(f"{str(obj)}{obj.get_position()}[hp={obj.get_hit_points()}]: Attack {str(object_nearby)}{object_nearby.get_position()}[hp={object_nearby.get_hit_points()}]")
                         else:
                             x, y = obj.hunt(object_nearby)
-                            # TODO: make it DRY
-                            distance = self.__calculate_range(*obj.get_position(), *object_nearby.get_position())
-                            if obj.get_speed() <= distance:
-                                x, y = object_nearby.get_position()
-                            else:
-                                x, y = self.__correct_position(x, y)
-                            # obj.move(x, y)
+                            
+                            x, y = self.__move_towards_object(obj, object_nearby)
                         break
                     elif isinstance(obj, Beaver) and isinstance(object_nearby, Tree):
                         # print(f"{str(obj)}: Eat")
                         if obj.get_position() == object_nearby.get_position():
                             obj.eat(object_nearby)
                             self.remove(object_nearby)
+                            # print(f"{str(obj)}: Eat")
                         else:
-                            # TODO: make it DRY
-                            distance = self.__calculate_range(*obj.get_position(), *object_nearby.get_position())
-                            if obj.get_speed() <= distance:
-                                x, y = move_towards_point(*obj.get_position(), *object_nearby.get_position(), obj.get_speed())
-                                x, y = self.__correct_position(x, y)
-                            else:
-                                x, y = object_nearby.get_position()
+                            x, y = self.__move_towards_object(obj, object_nearby)
                             # obj.move(x, y)
                         break
                     elif issubclass(obj.__class__, Prey) and isinstance(object_nearby, Plant):
@@ -764,14 +780,9 @@ class Board:
                         if obj.get_position() == object_nearby.get_position():
                             obj.eat(object_nearby)
                             self.remove(object_nearby)
+                            # print(f"{str(obj)}: Eat")
                         else:
-                            # TODO: make it DRY
-                            distance = self.__calculate_range(*obj.get_position(), *object_nearby.get_position())
-                            if obj.get_speed() <= distance:
-                                x, y = move_towards_point(*obj.get_position(), *object_nearby.get_position(), obj.get_speed())
-                                x, y = self.__correct_position(x, y)
-                            else:
-                                x, y = object_nearby.get_position()
+                            x, y = self.__move_towards_object(obj, object_nearby)
                             # obj.move(x, y)
                         break
                     elif isinstance(object_nearby, Water):
@@ -782,13 +793,7 @@ class Board:
                             obj.drink(object_nearby)
                             # self.remove(object_nearby)
                         else:
-                            # TODO: make it DRY
-                            distance = self.__calculate_range(*obj.get_position(), *object_nearby.get_position())
-                            if obj.get_speed() <= distance:
-                                x, y = move_towards_point(*obj.get_position(), *object_nearby.get_position(), obj.get_speed())
-                                x, y = self.__correct_position(x, y)
-                            else:
-                                x, y = object_nearby.get_position()
+                            x, y = self.__move_towards_object(obj, object_nearby)
                             # obj.move(x, y)
                         break
                     elif obj.__class__ == object_nearby.__class__:
@@ -797,13 +802,8 @@ class Board:
                             if obj.get_position() == object_nearby.get_position():
                                 self.populate(obj)
                             else:
-                                # TODO: make it DRY
-                                distance = self.__calculate_range(*obj.get_position(), *object_nearby.get_position())
-                                if obj.get_speed() <= distance:
-                                    x, y = move_towards_point(*obj.get_position(), *object_nearby.get_position(), obj.get_speed())
-                                    x, y = self.__correct_position(x, y)
-                                else:
-                                    x, y = object_nearby.get_position()
+                                
+                                x, y = self.__move_towards_object(obj, object_nearby)
                                 # obj.move(x, y)
                             break
                 else:
@@ -851,10 +851,10 @@ if __name__ == "__main__":
 
     board = Board(BoardSize(20, 20))
 
-    for _ in range(10):
+    for _ in range(50):
         board.add_random_animal()
 
-    for _ in range(10):
+    for _ in range(40):
         board.add_random_item()
 
     print(board)
