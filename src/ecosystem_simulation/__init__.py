@@ -16,39 +16,54 @@ TODO:
     - [ ] dodać komentarze
     - [ ] dodać testy
     - [ ] dodać dokumentację
-    - [ ] zamienić nazwy obiektów w siatce na odpowiednie emoji (np. 🐺)
     - [ ] dodać możliwość zapisu i wczytywania stanu symulacji (pickle)
     - [ ] dodać generowanie logów do pliku (logging)
     - [ ] dodać metody dodawania osobno drapieżników, ofiar i bobrów
+    - [ ] dodać tworzenie wykresów ilości populacji w czasie
 
 """
 
 
 class BoardSize:
+    """Klasa reprezentująca rozmiar planszy"""
+
     def __init__(self, width: int, height: int) -> None:
+        """Konstruktor klasy BoardSize
+
+        :param width: szerokość planszy
+        :param height: wysokość planszy
+        """
         self.__width = width
         self.__height = height
 
     def get_size(self) -> tuple:
-        """Zwraca rozmiar planszy"""
+        """Zwraca rozmiar planszy
+        
+        :return: krotka (szerokość, wysokość)
+        """
         return (self.__width, self.__height)
     
     def get_area(self) -> int:
-        """Zwraca powierzchnię planszy"""
+        """Zwraca powierzchnię planszy
+        
+        :return: powierzchnia planszy
+        """
         return self.__width * self.__height
     
 
 class Board:
+    """Klasa reprezentująca planszę"""
     
-    __total_object_count = 0
-    __population = 0
-    __predators = 0
-    __preys = 0
-    __grid = []
-    __objects = set()
-    __round = 0
-    __size = None
+    __total_object_count = 0  # całkowita liczba obiektów
+    __population = 0          # liczba żywych obiektów
+    __predators = 0           # liczba drapieżników
+    __preys = 0               # liczba ofiar
+    __grid = []               # siatka planszy
+    __objects = set()         # zbiór wszystkich obiektów
+    __round = 0               # tura
+    __size = None             # rozmiar planszy
 
+    # możliwe zwierzęta
     __possible_animals = {
         "Mouse": Mouse,
         "Deer": Deer,
@@ -57,18 +72,24 @@ class Board:
         "Beaver": Beaver
     }
 
+    # możliwe przedmioty
     __possible_items = {
         "Tree": Tree,
-        # "Rock": Rock,
+        "Rock": Rock,
         "Plant": Plant,
         "Water": Water
     }
 
     def __init__(self, size: BoardSize) -> None:
+        """Konstruktor klasy Board
+
+        :param size: rozmiar planszy
+        """
         self.__size = size
         self.__grid = [[None for _ in range(self.__size.get_size()[0])] for _ in range(self.__size.get_size()[1])]
 
     def __str__(self) -> str:
+        """Zwraca planszę w postaci stringa"""
         grid_str = [[str(cell) if cell is not None else name_to_emoji("Dirt") for cell in row] for row in self.get_grid()]
         lengths = [max(map(len, col)) for col in zip(*grid_str)]
         format = ''.join('{{:{}}}'.format(x) for x in lengths)
@@ -76,6 +97,7 @@ class Board:
         return '\n'.join(table)
     
     def __repr__(self) -> str:
+        """Zwraca planszę w postaci stringa"""
         return self.__str__()
 
     def get_size(self) -> tuple:
@@ -138,6 +160,7 @@ class Board:
                 return (x, y)
             retry += 1
         else:
+            # nie udało się wygenerować losowych współrzędnych
             return (-1, -1)
 
     def add_random_animal(self) -> None:
@@ -146,7 +169,8 @@ class Board:
         
         x, y = self.__generate_random_position()
         if x == -1 or y == -1:
-            return # TODO: raise exception
+            # nie udało się wygenerować losowych współrzędnych
+            return
 
         animal = eval(species)(
             x=x,
@@ -179,7 +203,7 @@ class Board:
 
         x, y = self.__generate_random_position()
         if x == -1 or y == -1:
-            return # TODO: raise exception
+            return
         
         item = eval(category)(
             x=x,
@@ -193,7 +217,10 @@ class Board:
         self.__total_object_count += 1
     
     def populate(self, animal: Animal) -> None:
-        """Dodaje zwierzę do planszy"""
+        """Dodaje zwierzę do planszy na podstawie innego zwierzęcia
+        
+        :param animal: zwierzę, na podstawie którego zostanie dodane nowe zwierzę
+        """
         baby = eval(type(animal).__name__)(
             x=animal.get_position()[0],
             y=animal.get_position()[1],
@@ -220,11 +247,11 @@ class Board:
             self.__preys += 1
 
     def remove(self, obj) -> None:
-        """Usuwa zwierzę z planszy"""
-        # if obj in self.__objects:
-        # print(f"Usuwanie {obj} z planszy [{obj in self.__objects}]")
+        """Usuwa obiekt z planszy
+        
+        :param obj: obiekt do usunięcia
+        """
         self.__objects.remove(obj)
-        # print(f"Usunięto {obj} z planszy [{obj in self.__objects}]")
 
         if issubclass(obj.__class__, Predator):
             self.__predators -= 1
@@ -238,7 +265,13 @@ class Board:
         del obj
 
     def __scan_area_nearby(self, x: int, y: int, view_range: int) -> list:
-        """Skanuje okolicę"""
+        """Skanuje okolicę w zadanym zasięgu w poszukiwaniu obiektów
+        
+        :param x: współrzędna x
+        :param y: współrzędna y
+        :param view_range: zasięg widzenia
+        :return: lista obiektów w zasięgu widzenia
+        """
         objests_nearby = []
         self.__set_grid()
         for i in range(x - view_range, x + view_range + 1):
@@ -256,11 +289,22 @@ class Board:
         return objests_nearby
     
     def __calculate_range(self, x1: int, y1: int, x2: int, y2: int) -> int:
-        """Oblicza dystans"""
+        """Oblicza dystans między dwoma punktami
+        
+        :param x1: współrzędna x pierwszego punktu
+        :param y1: współrzędna y pierwszego punktu
+        :param x2: współrzędna x drugiego punktu
+        :param y2: współrzędna y drugiego punktu
+        :return: dystans między punktami
+        """
         return int(math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2))
     
     def __correct_position(self, x: int, y: int) -> tuple:
-        """Poprawia współrzędne"""
+        """Poprawia współrzędne obiektu, jeśli wyjdą poza planszę
+        
+        :param x: współrzędna x
+        :param y: współrzędna y
+        """
         x = 0 if x < 0 else x
         y = 0 if y < 0 else y
         x = self.__size.get_size()[0] - 1 if x >= self.__size.get_size()[0] else x
@@ -268,130 +312,149 @@ class Board:
         return (x, y)
     
     def __move_towards_object(self, src: Animal, dst: Object) -> tuple:
-        """Przesuwa obiekt w kierunku innego obiektu"""
+        """Przesuwa obiekt w kierunku innego obiektu
+        
+        :param src: obiekt, który ma się przesunąć
+        :param dst: obiekt, w kierunku którego ma się przesunąć
+        """
         distance = self.__calculate_range(*src.get_position(), *dst.get_position())
         if src.get_speed() >= distance:
             x, y = dst.get_position()
         else:
             x, y = move_towards_point(*src.get_position(), *dst.get_position(), src.get_speed())
             x, y = self.__correct_position(x, y)
-        # print(f"{str(src)}{src.get_position()}: Move towards {str(dst)}{dst.get_position()}")
         return (x, y)
     
     def update(self) -> None:
         """Aktualizuje stan planszy"""
-        self.__round += 1
-        self.__set_grid()
+        self.__round += 1  # zwiększamy licznik rund
+        self.__set_grid()  # ustawiamy siatkę
+
+        # aktualizujemy stan obiektów
         for obj in list(self.__objects):
             if obj not in self.__objects:
+                # jeśli obiekt został usunięty, pomijamy go
                 continue
             if issubclass(obj.__class__, Animal):
+                # jeśli obiekt jest zwierzęciem, aktualizujemy jego stan
                 x, y = obj.get_position()
                 if obj.get_hit_points() <= 0:
+                    # jeśli zwierzę nie ma już punktów życia, usuwamy go
                     if not issubclass(obj.__class__, Prey):
+                        self.__preys -= 1
                         self.remove(obj)
                     continue
+
+                # rozglądamy się w poszukiwaniu obiektów w zasięgu widzenia
                 objects_nearby = sorted(self.__scan_area_nearby(*obj.get_position(), obj.get_view_range()), key=lambda o: self.__calculate_range(*obj.get_position(), *o.get_position()))
+
+                # sprawdzamy, jakie obiekty są w zasięgu widzenia
                 for object_nearby in objects_nearby:
                     if object_nearby not in self.__objects:
+                        # jeśli obiekt nie istnieje, pomijamy go
                         continue
                     if objects_nearby is obj:
+                        # jeśli obiekt jest sam ze sobą, pomijamy go
                         continue
                     if issubclass(obj.__class__, Prey) and issubclass(object_nearby.__class__, Predator):
-                        # print(f"{str(obj)}: Run")
+                        # jeśli obiekt jest ofiarą, a obiekt w zasięgu widzenia jest drapieżnikiem, uciekamy
                         if object_nearby.get_hit_points() <= 0:
+                            # jeśli drapieżnik nie ma już punktów życia, pomijamy go
                             self.remove(object_nearby)
                             continue
                         if obj.get_position() == object_nearby.get_position():
+                            # jeśli ofiara i drapieżnik są w tym samym miejscu, atakujemy
                             obj.defend(object_nearby)
-                            # print(f"{str(obj)}: Defend")
                         else:
+                            # uciekamy
                             x, y = obj.run(object_nearby)
                             x, y = self.__correct_position(x, y)
-                            # obj.move(x, y)
-                            # print(f"{str(obj)}: Run")
                         break
                     elif issubclass(obj.__class__, Predator) and issubclass(object_nearby.__class__, Prey):
-                        # print(f"{str(obj)}: Attack")
+                        # jeśli obiekt jest drapieżnikiem, a obiekt w zasięgu widzenia jest ofiarą, atakujemy
                         if obj.get_position() == object_nearby.get_position():
                             if object_nearby.get_hit_points() <= 0:
+                                # jeśli ofiara nie ma już punktów życia, zjadamy ją
                                 obj.eat(object_nearby)
                                 self.remove(object_nearby)
-                                # print(f"{str(obj)}: Eat")
                             else:
+                                # jeśli ofiara ma jeszcze punkty życia, atakujemy
                                 obj.attack(object_nearby)
-                                # print(f"{str(obj)}{obj.get_position()}[hp={obj.get_hit_points()}]: Attack {str(object_nearby)}{object_nearby.get_position()}[hp={object_nearby.get_hit_points()}]")
                         else:
+                            # polujemy na ofiarę
                             x, y = obj.hunt(object_nearby)
-                            
                             x, y = self.__move_towards_object(obj, object_nearby)
                         break
                     elif isinstance(obj, Beaver) and isinstance(object_nearby, Tree):
-                        # print(f"{str(obj)}: Eat")
+                        # jeśli obiekt jest bobrem, a obiekt w zasięgu widzenia jest drzewem, jemy je
                         if obj.get_position() == object_nearby.get_position():
                             obj.eat(object_nearby)
                             self.remove(object_nearby)
-                            # print(f"{str(obj)}: Eat")
                         else:
+                            # poruszamy się w kierunku drzewa
                             x, y = self.__move_towards_object(obj, object_nearby)
-                            # obj.move(x, y)
                         break
                     elif issubclass(obj.__class__, Prey) and isinstance(object_nearby, Plant):
-                        # print(f"{str(obj)}: Eat")
+                        # jeśli obiekt jest ofiarą, a obiekt w zasięgu widzenia jest rośliną, jemy ją
                         if obj.get_position() == object_nearby.get_position():
                             obj.eat(object_nearby)
                             self.remove(object_nearby)
-                            # print(f"{str(obj)}: Eat")
                         else:
+                            # poruszamy się w kierunku rośliny
                             x, y = self.__move_towards_object(obj, object_nearby)
-                            # obj.move(x, y)
                         break
                     elif isinstance(object_nearby, Water):
-                        # print(f"{str(obj)}: Drink")
+                        # jeśli obiekt jest wodą, pijemy ją
                         if obj.get_thirst() >= 90:
+                            # jeśli zwierzę jest nawodnione, pomijamy ją
                             continue
                         if obj.get_position() == object_nearby.get_position():
+                            # jeśli zwierzę jest w tym samym miejscu, pijemy
                             obj.drink(object_nearby)
-                            # self.remove(object_nearby)
+                            self.remove(object_nearby)
                         else:
+                            # poruszamy się w kierunku wody
                             x, y = self.__move_towards_object(obj, object_nearby)
-                            # obj.move(x, y)
                         break
                     elif obj.__class__ == object_nearby.__class__:
-                        # print(f"{str(obj)}: Reproduce")
+                        # jeśli obiekt jest tego samego typu, próbujemy się rozmnożyć
                         if obj.can_reproduce_with(object_nearby):
                             if obj.get_position() == object_nearby.get_position():
+                                # jeśli zwierzę jest w tym samym miejscu, rozmnażamy się
                                 self.populate(obj)
                             else:
-                                
+                                # poruszamy się w kierunku partnera
                                 x, y = self.__move_towards_object(obj, object_nearby)
-                                # obj.move(x, y)
                             break
                 else:
+                    # jeśli nie znaleziono żadnego obiektu w zasięgu widzenia, losowo poruszamy się po mapie
                     x, y = randint(1, self.__size.get_size()[0] - 1), randint(1, self.__size.get_size()[1] - 1)
                     x, y = move_towards_point(*obj.get_position(), x, y, obj.get_speed())
                     x, y = self.__correct_position(x, y)
-                    # obj.move(x, y)
-                    # print(f"{str(obj)}: Random move")
+
+                # zwiększamy wiek zwierzęcia i poruszamy się
                 obj.set_age(obj.get_age() + 1)
                 obj.move(x, y)
-        if self.__total_object_count - self.__population < 5 * self.get_area() // 100:
+        
+        # jeśli liczba obiektów nieożywionych jest mniejsza niż 15% powierzchni mapy, dodajemy losowe obiekty
+        if self.__total_object_count - self.__population < 15 * self.get_area() // 100:
             self.add_random_item()
+
+        # ustawiamy siatkę
         self.__set_grid()
 
 
     def check_end_conditions(self) -> bool:
-        """Sprawdza warunki końcowe"""
+        """Sprawdza warunki końcowe.
+        Symulacja kończy się, gdy:
+        - liczba ofiar jest równa 0
+        - liczba drapieżników jest równa 0
+        - cała populacja jest równa 0
+        """
         if self.__population == 0:
-            # raise Exception("Population number is: ", self.__population)
-            # print("Population number is: ", self.__population)
-            return f"Population number is: {self.__population}"
+            return f"Wszystkie zwierzęta umarły"
         if self.__predators == 0:
-            # raise Exception("Predators number is: ", self.__predators)
-            # print("Predators number is: ", self.__predators)
-            return f"Predators number is: {self.__predators}"
+            return f"Wszystkie drapieżniki umarły"
         if self.__preys == 0:
-            # raise Exception("Preys number is: ", self.__preys)
-            # print("Preys number is: ", self.__preys)
-            return f"Preys number is: {self.__preys}"
+            return f"Wszystkie ofiary umarły"
         return False

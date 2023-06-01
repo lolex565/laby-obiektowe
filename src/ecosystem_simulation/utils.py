@@ -61,6 +61,7 @@ def name_to_emoji(name: str) -> str:
         "Plant": "🌱",
         "Water": "💧",
         "Dirt": "🟫", 
+        "Rock": "🪨",
     }
 
     return emojis.get(name, "❓")
