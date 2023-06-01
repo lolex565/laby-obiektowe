@@ -1,466 +1,27 @@
 from copy import deepcopy
 from random import randint, choice, uniform
-import pickle, platform, os, math, time, logging
+import math
+
+from ecosystem_simulation.objects.items import *
+from ecosystem_simulation.objects.animals import *
+from ecosystem_simulation.objects.animals.beaver import Beaver
+from ecosystem_simulation.objects.animals.predators import *
+from ecosystem_simulation.objects.animals.preys import *
+from ecosystem_simulation.utils import *
+
 
 """
 TODO:
 
-    - [ ] zaimplementować metody planszy odpowiedzialne za właściwe działanie symulacji
-    - [ ] podzielić plik na mniejsze i ustrukturyzować
     - [ ] dodać komentarze
     - [ ] dodać testy
     - [ ] dodać dokumentację
-    - [ ] zamienić nazwy obiektów w siatce na emoji
+    - [ ] zamienić nazwy obiektów w siatce na odpowiednie emoji (np. 🐺)
     - [ ] dodać możliwość zapisu i wczytywania stanu symulacji (pickle)
     - [ ] dodać generowanie logów do pliku (logging)
     - [ ] dodać metody dodawania osobno drapieżników, ofiar i bobrów
 
 """
-
-def move_towards_point(x: int, y: int, x2: int, y2: int, distance: int) -> tuple:
-        """Przesuwa się w kierunku punktu"""
-        if x2 == x and y2 == y:
-            return (x, y)
-        if x2 == x:
-            if y2 > y:
-                return (x, y + distance)
-            else:
-                return (x, y - distance)
-        if y2 == y:
-            if x2 > x:
-                return (x + distance, y)
-            else:
-                return (x - distance, y)
-        if x2 > x:
-            if y2 > y:
-                return (x + distance, y + distance)
-            else:
-                return (x + distance, y - distance)
-        else:
-            if y2 > y:
-                return (x - distance, y + distance)
-            else:
-                return (x - distance, y - distance)
-            
-def move_away_from_point(x: int, y: int, x2: int, y2: int, distance: int) -> tuple:
-    """Przesuwa się zdala od punktu"""
-    if x2 == x and y2 == y:
-        return (x, y)
-    if x2 == x:
-        if y2 > y:
-            return (x, y - distance)
-        else:
-            return (x, y + distance)
-    if y2 == y:
-        if x2 > x:
-            return (x - distance, y)
-        else:
-            return (x + distance, y)
-    if x2 > x:
-        if y2 > y:
-            return (x - distance, y - distance)
-        else:
-            return (x - distance, y + distance)
-    else:
-        if y2 > y:
-            return (x + distance, y - distance)
-        else:
-            return (x + distance, y + distance)
-
-####### OBJECTS #######
-
-class Object:
-    __hashcode = None
-
-    def __init__(self, x: int, y: int, weight: float) -> None:
-        self.__x = x
-        self.__y = y
-        self.__weight = weight
-        self.__hashcode = id(self)
-
-    def get_position(self) -> tuple:
-        """Zwraca współrzędne obiektu"""
-        return self.__x, self.__y
-    
-    def set_position(self, x: int, y: int) -> None:
-        """Ustawia współrzędne obiektu"""
-        self.__x = x
-        self.__y = y
-    
-    def get_weight(self) -> tuple:
-        """Zwraca wagę obiektu"""
-        return self.__weight
-    
-    def __str__(self) -> str:
-        return str(type(self).__name__)
-    
-    def __repr__(self) -> str:
-        return self.__str__()
-    
-    def get_hit_points(self):
-        pass
-
-    def __hash__(self) -> int:
-        return self.__hashcode
-    
-
-####### ITEMS #######
-
-
-class Item(Object):
-    def __init__(self, x: int, y: int, weight: float, energy: int,
-                 durability: int) -> None:
-        super().__init__(x, y, weight)
-        self.__energy = energy
-        self.__durability = durability
-
-    def get_energy(self) -> int:
-        """Zwraca ilość energii, jaką dostarcza jedzenie"""
-        return self.__energy
-    
-    def get_durability(self) -> int:
-        """Zwraca trwałość przedmiotu"""
-        return self.__durability
-    
-
-class Plant(Item):
-    def __init__(self, x: int, y: int, weight: float, energy: int,
-                 durability: int) -> None:
-        super().__init__(x, y, weight, energy, durability)
-
-
-class Water(Item):
-    def __init__(self, x: int, y: int, weight: float, energy: int,
-                 durability: int) -> None:
-        super().__init__(x, y, weight, energy, durability)
-
-
-class Tree(Item):
-    def __init__(self, x: int, y: int, weight: float, energy: int,
-                 durability: int) -> None:
-        super().__init__(x, y, weight, energy, durability)
-
-
-# class Rock(Item):
-#     def __init__(self, x: int, y: int, weight: float, energy: int,
-#                  durability: int) -> None:
-#         super().__init__(x, y, weight, energy, durability)
-
-
-####### ANIMALS #######
- 
-
-GENDER_MALE = True
-GENDER_FEMALE = False
-
-
-class Animal(Object):
-    def __init__(self, x: int, y: int, weight: float, speed: int,
-                 age: int, thirst: int, satiety: int, gender: bool, view_range: int,
-                strenght: int, hit_points: int = 100) -> None:
-        super().__init__(x, y, weight)
-        self.__speed = speed
-        self.__age = age
-        self.__thirst = thirst
-        self.__satiety = satiety
-        self.__gender = gender
-        self.__view_range = view_range
-        self.__hit_points = hit_points
-        self.__strenght = strenght
-
-    def get_speed(self) -> float:
-        """Zwraca prędkość zwierzęcia"""
-        return self.__speed
-    
-    def get_age(self) -> int:
-        """Zwraca wiek zwierzęcia"""
-        return self.__age
-    
-    def set_age(self, age: int) -> None:
-        """Ustawia wiek zwierzęcia"""
-        self.__age = age
-    
-    def get_satiety(self) -> int:
-        """Zwraca poziom sytości zwierzęcia"""
-        return self.__satiety
-    
-    def set_satiety(self, satiety: int) -> None:
-        """Ustawia poziom sytości zwierzęcia"""
-        self.__satiety = satiety
-
-    def get_thirst(self) -> int:
-        """Zwraca poziom pragnienia zwierzęcia"""
-        return self.__thirst
-    
-    def get_gender(self) -> int:
-        """Zwraca płeć zwierzęcia"""
-        return self.__gender
-    
-    def get_view_range(self) -> int:
-        """Zwraca zasięg widzenia zwierzęcia"""
-        return self.__view_range
-    
-    def get_hit_points(self) -> int:    
-        """Zwraca punkty życia zwierzęcia"""
-        return self.__hit_points
-    
-    def get_strenght(self) -> int:
-        """Zwraca siłę zwierzęcia"""
-        return self.__strenght
-    
-    def move(self, x: int, y: int) -> None:
-        """Przesuwa zwierzę na podane współrzędne"""
-        energy_lost = int((abs(self.get_position()[0] - x) + abs(self.get_position()[1] - y)) % 10)
-        if self.__satiety == 0 or self.__thirst == 0:
-            self.__hit_points -= energy_lost
-            self.__hit_points = int(max(self.__hit_points, 0))
-        else:
-            self.__satiety -= energy_lost
-            self.__thirst -= energy_lost
-            self.__satiety = max(self.__satiety, 0)
-            self.__thirst = max(self.__thirst, 0)
-        self.set_position(x, y)
-
-    def eat(self, food: Plant) -> None:
-        """Zwiększa poziom sytości zwierzęcia o wagę jedzenia"""
-        self.set_satiety((food.get_weight() * food.get_energy()) % 100)
-
-    def drink(self, water: Water) -> None:
-        """Zwiększa poziom sytości zwierzęcia o wagę wody"""
-        self.__thirst += water.get_weight() % 100
-
-    def can_reproduce_with(self, partner) -> bool:
-        """Zwraca True, jeśli zwierzęta mogą się rozmnażać"""
-        if type(self).__name__ == type(partner).__name__:
-            if self.get_gender() != self.get_gender():
-                if self.get_age() >= 5 and partner.get_age() >= 5:
-                    if self.get_hit_points() >= 0 and partner.get_hit_points() >= 0:
-                        return True
-        return False
-
-    def get_durability(self) -> int:
-        """Zwraca trwałość atrybutu ataku lub obrony zwierzęcia"""
-        return 0
-
-    def set_durability(self, damage_points: int) -> int:
-        """Zadaje zwierzęciu obrażenia"""
-        return damage_points
-
-    def set_damage(self, points: int) -> None:
-        """Zadaje zwierzęciu obrażenia"""
-        points = int(self.set_durability(points))
-        self.__hit_points -= points
-        self.__hit_points = int(max(self.__hit_points, 0))
-
-    def make_sound(self) -> int:
-        """Zwraca głośność wydawanego przez zwierzę dźwięku"""
-        return 0
-
-
-class Beaver(Animal):
-    __teeth_durability = 100
-
-    def __init__(self, x: int, y: int, weight: float, speed: int,
-                 age: int, thirst: int, satiety: int, gender: bool, view_range: int,
-                 strenght: int, hit_points: int = 100, **kwargs) -> None:
-        super().__init__(x, y, weight, speed, age, thirst, satiety, gender, view_range,
-                         strenght, hit_points)
-        
-    def eat(self, tree: Tree) -> None:
-        """Zjada drzewo"""
-        self.set_satiety((tree.get_weight() * tree.get_energy()) % 100)
-        self.__teeth_durability -= tree.get_durability() // 100
-
-    def get_teeth_durability(self) -> int:
-        """Zwraca trwałość zębów"""
-        return self.__teeth_durability
-    
-    def set_durability(self, damage_points: int) -> int:
-        """Zadaje zwierzęciu obrażenia"""
-        points = damage_points - self.__teeth_durability
-        self.__teeth_durability -= damage_points
-        self.__teeth_durability = max(self.__teeth_durability, 0)
-        return max(points, 0)
-    
-    def get_durability(self) -> int:
-        """Zwraca trwałość atrybutu ataku lub obrony zwierzęcia"""
-        return self.get_teeth_durability()
-    
-
-class Predator(Animal):
-
-    def __init__(self, x: int, y: int, weight: float, speed: int,
-                 age: int, thirst: int, satiety: int, gender: bool, view_range: int,
-                 strenght: int, anger: int, hit_points: int = 100) -> None:
-        super().__init__(x, y, weight, speed, age, thirst, satiety, gender, view_range,
-                         strenght, hit_points)
-        self.__anger = anger
-
-    def get_anger(self) -> int:
-        """Zwraca poziom złości"""
-        return self.__anger
-    
-    def hunt(self, prey: Animal) -> tuple:
-        """Atakuje ofiarę"""
-        self.__anger += prey.make_sound()
-        x, y = move_towards_point(*self.get_position(), *prey.get_position(), self.get_speed())
-        return x, y
-
-    def attack(self, prey: Animal) -> None:
-        """Zadaje obrażenia"""
-        prey.set_damage(int(self.get_strenght() + self.get_weight() + self.get_anger()))
-
-    def make_sound(self) -> int:
-        return int(self.get_anger() + self.get_weight() + self.get_strenght())
-    
-    def eat(self, prey: Animal) -> None:
-        """Zjada ofiarę"""
-        satiety = self.get_satiety()
-        satiety += int(prey.get_weight())
-        self.set_satiety(max(satiety, 100))
-        self.__anger -= int(prey.get_weight()) % 100
-
-
-class Prey(Animal):
-    def __init__(self, x: int, y: int, weight: float, speed: int,
-                 age: int, thirst: int, satiety: int, gender: bool, view_range: int,
-                 strenght: int, fear: int, hit_points: int = 100) -> None:
-        super().__init__(x, y, weight, speed, age, thirst, satiety, gender, view_range,
-                         strenght, hit_points)
-        self.__fear = fear
-
-    def get_fear(self) -> int:
-        """Zwraca poziom strachu"""
-        return self.__fear
-    
-    def run(self, predator) -> None:
-        """Ucieka przed drapieżnikiem"""
-        self.__fear += predator.make_sound()
-        x, y = move_away_from_point(*self.get_position(), *predator.get_position(), self.get_speed())
-        return x, y
-
-    def defend(self, predator) -> None:
-        """Obronić się przed drapieżnikiem"""
-        predator.set_damage(int(self.get_strenght() + self.get_weight() + self.get_fear()))
-
-    def make_sound(self) -> int:
-        return self.get_fear() + self.get_weight() + self.get_strenght()
-
-
-class Wolf(Predator):
-    __claws_durability = 100
-
-    def __init__(self, x: int, y: int, weight: float, speed: int,
-                 age: int, thirst: int, satiety: int, gender: bool, view_range: int,
-                 strenght: int, anger: int, hit_points: int = 100, **kwargs) -> None:
-        super().__init__(x, y, weight, speed, age, thirst, satiety, gender, view_range,
-                         strenght, anger, hit_points)
-        
-    def roar(self) -> int:
-        """Wydać dźwięk"""
-        return 20
-
-    def get_claws_durability(self) -> int:
-        """Zwraca trwałość pazurów"""
-        return self.__claws_durability
-    
-    def get_durability(self) -> int:
-        return self.get_claws_durability()
-    
-    def set_durability(self, damage_points: int) -> int:
-        """Zadaje zwierzęciu obrażenia"""
-        points = damage_points - self.__claws_durability
-        self.__claws_durability -= damage_points
-        self.__claws_durability = max(self.__claws_durability, 0)
-        return max(points, 0)
-    
-    def make_sound(self) -> int:
-        return super().make_sound() + self.roar()
-    
-class Eagle(Predator):
-    __beak_durability = 100
-
-    def __init__(self, x: int, y: int, weight: float, speed: int,
-                 age: int, thirst: int, satiety: int, gender: bool, view_range: int,
-                 strenght: int, anger: int, hit_points: int = 100, **kwargs) -> None:
-        super().__init__(x, y, weight, speed, age, thirst, satiety, gender, view_range,
-                         hit_points, strenght, anger)
-        
-    def screech(self) -> int:
-        """Wydać dźwięk"""
-        return 10
-
-    def get_beak_durability(self) -> int:
-        """Zwraca trwałość dzioba"""
-        return self.__beak_durability
-    
-    def get_durability(self) -> int:
-        return self.get_beak_durability()
-    
-    def set_durability(self, damage_points: int) -> int:
-        """Zadaje zwierzęciu obrażenia"""
-        points = damage_points - self.__beak_durability
-        self.__beak_durability -= damage_points
-        self.__beak_durability = max(self.__beak_durability, 0)
-        return max(points, 0)
-    
-    def make_sound(self) -> int:
-        return super().make_sound() + self.screech()
-    
-class Mouse(Prey):
-
-    def __init__(self, x: int, y: int, weight: float, speed: int,
-                 age: int, thirst: int, satiety: int, gender: bool, view_range: int,
-                 strenght: int, fear: int, hit_points: int = 100, **kwargs) -> None:
-        super().__init__(x, y, weight, speed, age, thirst, satiety, gender, view_range,
-                         strenght, fear, hit_points)
-        
-    def squeak(self) -> int:
-        """Wydać dźwięk"""
-        return 1
-
-    def get_durability(self) -> int:
-        return 0
-    
-    def set_durability(self, damage_points: int) -> int:
-        return damage_points
-    
-    def make_sound(self) -> int:
-        return super().make_sound() + self.squeak()
-
-
-class Deer(Prey):
-    __antlers_durability = 100
-
-    def __init__(self, x: int, y: int, weight: float, speed: int,
-                 age: int, thirst: int, satiety: int, gender: bool, view_range: int,
-                 strenght: int, fear: int, hit_points: int = 100, **kwargs) -> None:
-        super().__init__(x, y, weight, speed, age, thirst, satiety, gender, view_range,
-                         strenght, fear, hit_points)
-        
-    def yell(self) -> int:
-        """Wydać dźwięk"""
-        return 10
-
-    def get_antlers_durability(self) -> int:
-        """Zwraca trwałość poroża"""
-        return self.__antlers_durability
-    
-    def get_durability(self) -> int:
-        return self.get_antlers_durability()
-    
-    def set_durability(self, damage_points: int) -> int:
-        """Zadaje zwierzęciu obrażenia"""
-        points = damage_points - self.__antlers_durability
-        self.__antlers_durability -= damage_points
-        self.__antlers_durability = max(self.__antlers_durability, 0)
-        return max(points, 0)
-    
-    def make_sound(self) -> int:
-        return super().make_sound() + self.yell()
-    
-
-###### BOARD ######
 
 
 class BoardSize:
@@ -508,9 +69,9 @@ class Board:
         self.__grid = [[None for _ in range(self.__size.get_size()[0])] for _ in range(self.__size.get_size()[1])]
 
     def __str__(self) -> str:
-        grid_str = [[str(cell) if cell is not None else " " for cell in row] for row in self.get_grid()]
+        grid_str = [[str(cell) if cell is not None else name_to_emoji("Dirt") for cell in row] for row in self.get_grid()]
         lengths = [max(map(len, col)) for col in zip(*grid_str)]
-        format = '\t'.join('{{:{}}}'.format(x) for x in lengths)
+        format = ''.join('{{:{}}}'.format(x) for x in lengths)
         table = [format.format(*row) for row in grid_str]
         return '\n'.join(table)
     
@@ -661,9 +222,9 @@ class Board:
     def remove(self, obj) -> None:
         """Usuwa zwierzę z planszy"""
         # if obj in self.__objects:
-        print(f"Usuwanie {obj} z planszy [{obj in self.__objects}]")
+        # print(f"Usuwanie {obj} z planszy [{obj in self.__objects}]")
         self.__objects.remove(obj)
-        print(f"Usunięto {obj} z planszy [{obj in self.__objects}]")
+        # print(f"Usunięto {obj} z planszy [{obj in self.__objects}]")
 
         if issubclass(obj.__class__, Predator):
             self.__predators -= 1
@@ -823,62 +384,14 @@ class Board:
         """Sprawdza warunki końcowe"""
         if self.__population == 0:
             # raise Exception("Population number is: ", self.__population)
-            print("Population number is: ", self.__population)
-            return True
+            # print("Population number is: ", self.__population)
+            return f"Population number is: {self.__population}"
         if self.__predators == 0:
             # raise Exception("Predators number is: ", self.__predators)
-            print("Predators number is: ", self.__predators)
-            return True
+            # print("Predators number is: ", self.__predators)
+            return f"Predators number is: {self.__predators}"
         if self.__preys == 0:
             # raise Exception("Preys number is: ", self.__preys)
-            print("Preys number is: ", self.__preys)
-            return True
+            # print("Preys number is: ", self.__preys)
+            return f"Preys number is: {self.__preys}"
         return False
-
-
-if __name__ == "__main__":
-    print("Compiles!")
-
-    predator = Wolf(0, 0, 5.6, 20, 3, 100, 100, GENDER_MALE, 10, 50, 20)
-    prey = Mouse(0, 0, 0.1, 10, 1, 100, 100, GENDER_FEMALE, 10, 1, 10)
-    print(predator.get_hit_points())
-    print(prey.get_hit_points())
-    predator.attack(prey)
-    print(prey.get_hit_points())
-    prey.defend(predator)
-    print(predator.get_durability())
-    print(predator.get_hit_points())
-
-    board = Board(BoardSize(20, 20))
-
-    for _ in range(50):
-        board.add_random_animal()
-
-    for _ in range(40):
-        board.add_random_item()
-
-    print(board)
-
-    clear_screen_cmd = "cls" if platform.system() == "Windows" else "clear"
-
-    while not board.check_end_conditions():
-        os.system(clear_screen_cmd)
-        print(board)
-        board.update()
-        objects = list(sorted((f"{o}{o.get_position()}[hp={o.get_hit_points()}]" for o in board.get_objects())))
-        print(objects)
-        print("Population = ", board.get_population())
-        print("Predators = ", board.get_predators())
-        print("Preys = ", board.get_preys())
-        # input(f"End = {board.check_end_conditions()}")
-        time.sleep(0.4)
-    
-    # board.update()
-    # print(board)
-    print(board.get_objects())
-
-    s = set()
-    s.add(predator)
-    l = list(s)
-    print(predator in s)
-    print(predator in l)
