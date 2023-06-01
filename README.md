@@ -30,6 +30,11 @@ Zwierzęta będą mogły pić.
 
 ## Sposób uruchomienia
 
+Najpierw należy sklonoać repozytorium:
+
+```git clone https://github.com/lolex565/laby-obiektowe.git```
+
 Aby uruchomić program należy wpisać w terminalu będąc w katalogu projektu:
+
 
 ```python3 src/main.py```
