@@ -255,13 +255,16 @@ class Board:
 
         if issubclass(obj.__class__, Predator):
             self.__predators -= 1
+            self.__predators = max(self.__predators, 0)
             self.__population -= 1
         if issubclass(obj.__class__, Prey):
             self.__preys -= 1
+            self.__preys = max(self.__preys, 0)
             self.__population -= 1
         if isinstance(obj, Beaver):
             self.__population -= 1
         self.__total_object_count -= 1
+        self.__population = max(self.__population, 0)
         del obj
 
     def __scan_area_nearby(self, x: int, y: int, view_range: int) -> list:
@@ -451,10 +454,10 @@ class Board:
         - liczba drapieżników jest równa 0
         - cała populacja jest równa 0
         """
-        if self.__population == 0:
+        if self.__population <= 0:
             return f"Wszystkie zwierzęta umarły"
-        if self.__predators == 0:
+        if self.__predators <= 0:
             return f"Wszystkie drapieżniki umarły"
-        if self.__preys == 0:
+        if self.__preys <= 0:
             return f"Wszystkie ofiary umarły"
         return False
