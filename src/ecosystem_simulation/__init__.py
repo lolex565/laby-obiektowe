@@ -258,9 +258,10 @@ class Board:
             self.__predators = max(self.__predators, 0)
             self.__population -= 1
         if issubclass(obj.__class__, Prey):
-            self.__preys -= 1
-            self.__preys = max(self.__preys, 0)
-            self.__population -= 1
+            if not obj.is_dead():
+                self.__preys -= 1
+                self.__preys = max(self.__preys, 0)
+                self.__population -= 1
         if isinstance(obj, Beaver):
             self.__population -= 1
         self.__total_object_count -= 1
@@ -344,8 +345,12 @@ class Board:
                 if obj.get_hit_points() <= 0:
                     # jeśli zwierzę nie ma już punktów życia, usuwamy go
                     if not issubclass(obj.__class__, Prey):
-                        self.__preys -= 1
                         self.remove(obj)
+                    else:
+                        obj.die()
+                        self.__preys -= 1
+                        self.__preys = max(self.__preys, 0)
+                        self.__population -= 1
                     continue
 
                 # rozglądamy się w poszukiwaniu obiektów w zasięgu widzenia
