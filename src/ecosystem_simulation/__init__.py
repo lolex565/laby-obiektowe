@@ -2,12 +2,12 @@ from copy import deepcopy
 from random import randint, choice, uniform
 import math
 
-from ecosystem_simulation.objects.items import *
-from ecosystem_simulation.objects.animals import *
-from ecosystem_simulation.objects.animals.beaver import Beaver
-from ecosystem_simulation.objects.animals.predators import *
-from ecosystem_simulation.objects.animals.preys import *
-from ecosystem_simulation.utils import *
+from .objects.items import *
+from .objects.animals import *
+from .objects.animals.beaver import Beaver
+from .objects.animals.predators import *
+from .objects.animals.preys import *
+from .utils import *
 
 
 """
@@ -460,9 +460,9 @@ class Board:
         - cała populacja jest równa 0
         """
         if self.__population <= 0:
-            return f"Wszystkie zwierzęta umarły"
+            return "Wszystkie zwierzęta umarły"
         if self.__predators <= 0:
-            return f"Wszystkie drapieżniki umarły"
+            return "Wszystkie drapieżniki umarły"
         if self.__preys <= 0:
-            return f"Wszystkie ofiary umarły"
+            return "Wszystkie ofiary umarły"
         return False

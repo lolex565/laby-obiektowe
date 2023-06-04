@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: package ecosystem_simulation</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title">ecosystem_simulation</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:/home/wexe1/Dokumenty/notes/Studia/Programowanie_obiektowe/Laby/Projekt/Ekosystem/projekt-laby/src/ecosystem_simulation/__init__.py">/home/wexe1/Dokumenty/notes/Studia/Programowanie_obiektowe/Laby/Projekt/Ekosystem/projekt-laby/src/ecosystem_simulation/__init__.py</a></td></tr></table>
+    <p></p>
+<p>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Package Contents</strong></td></tr>
+    
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="ecosystem_simulation.objects.html"><strong>objects</strong>&nbsp;(package)</a><br>
+</td><td class="multicolumn"><a href="ecosystem_simulation.utils.html">utils</a><br>
+</td><td class="multicolumn"></td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor index-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Classes</strong></td></tr>
+    
+<tr><td class="decor index-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl>
+<dt class="heading-text"><a href="builtins.html#object">builtins.object</a>
+</dt><dd>
+<dl>
+<dt class="heading-text"><a href="ecosystem_simulation.html#Board">Board</a>
+</dt><dt class="heading-text"><a href="ecosystem_simulation.html#BoardSize">BoardSize</a>
+</dt></dl>
+</dd>
+</dl>
+ <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="Board">class <strong>Board</strong></a>(<a href="builtins.html#object">builtins.object</a>)</td></tr>
+    
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code"><a href="#Board">Board</a>(size:&nbsp;ecosystem_simulation.<a href="#BoardSize">BoardSize</a>)&nbsp;-&amp;gt;&nbsp;None<br>
+&nbsp;<br>
+Klasa&nbsp;reprezentująca&nbsp;planszę<br>&nbsp;</span></td></tr>
+<tr><td>&nbsp;</td>
+<td class="singlecolumn">Methods defined here:<br>
+<dl><dt><a name="Board-__init__"><strong>__init__</strong></a>(self, size: ecosystem_simulation.BoardSize) -&gt; None</dt><dd><span class="code">Konstruktor&nbsp;klasy&nbsp;<a href="#Board">Board</a><br>
+&nbsp;<br>
+:param&nbsp;size:&nbsp;rozmiar&nbsp;planszy</span></dd></dl>
+
+<dl><dt><a name="Board-__repr__"><strong>__repr__</strong></a>(self) -&gt; str</dt><dd><span class="code">Zwraca&nbsp;planszę&nbsp;w&nbsp;postaci&nbsp;stringa</span></dd></dl>
+
+<dl><dt><a name="Board-__str__"><strong>__str__</strong></a>(self) -&gt; str</dt><dd><span class="code">Zwraca&nbsp;planszę&nbsp;w&nbsp;postaci&nbsp;stringa</span></dd></dl>
+
+<dl><dt><a name="Board-add_random_animal"><strong>add_random_animal</strong></a>(self) -&gt; None</dt><dd><span class="code">Dodaje&nbsp;losowe&nbsp;zwierzę</span></dd></dl>
+
+<dl><dt><a name="Board-add_random_item"><strong>add_random_item</strong></a>(self) -&gt; None</dt><dd><span class="code">Dodaje&nbsp;losowy&nbsp;przedmiot</span></dd></dl>
+
+<dl><dt><a name="Board-add_random_object"><strong>add_random_object</strong></a>(self) -&gt; None</dt><dd><span class="code">Dodaje&nbsp;losowy&nbsp;obiekt</span></dd></dl>
+
+<dl><dt><a name="Board-check_end_conditions"><strong>check_end_conditions</strong></a>(self) -&gt; bool</dt><dd><span class="code">Sprawdza&nbsp;warunki&nbsp;końcowe.<br>
+Symulacja&nbsp;kończy&nbsp;się,&nbsp;gdy:<br>
+-&nbsp;liczba&nbsp;ofiar&nbsp;jest&nbsp;równa&nbsp;0<br>
+-&nbsp;liczba&nbsp;drapieżników&nbsp;jest&nbsp;równa&nbsp;0<br>
+-&nbsp;cała&nbsp;populacja&nbsp;jest&nbsp;równa&nbsp;0</span></dd></dl>
+
+<dl><dt><a name="Board-get_area"><strong>get_area</strong></a>(self) -&gt; int</dt><dd><span class="code">Zwraca&nbsp;powierzchnię&nbsp;planszy</span></dd></dl>
+
+<dl><dt><a name="Board-get_grid"><strong>get_grid</strong></a>(self) -&gt; list</dt><dd><span class="code">Zwraca&nbsp;planszę</span></dd></dl>
+
+<dl><dt><a name="Board-get_objects"><strong>get_objects</strong></a>(self) -&gt; set</dt><dd><span class="code">Zwraca&nbsp;zbiór&nbsp;wszystkich&nbsp;obiektów</span></dd></dl>
+
+<dl><dt><a name="Board-get_population"><strong>get_population</strong></a>(self) -&gt; int</dt><dd><span class="code">Zwraca&nbsp;liczbę&nbsp;wszystkich&nbsp;zwierząt</span></dd></dl>
+
+<dl><dt><a name="Board-get_predators"><strong>get_predators</strong></a>(self) -&gt; int</dt><dd><span class="code">Zwraca&nbsp;liczbę&nbsp;drapieżników</span></dd></dl>
+
+<dl><dt><a name="Board-get_preys"><strong>get_preys</strong></a>(self) -&gt; int</dt><dd><span class="code">Zwraca&nbsp;liczbę&nbsp;ofiar</span></dd></dl>
+
+<dl><dt><a name="Board-get_round"><strong>get_round</strong></a>(self) -&gt; int</dt><dd><span class="code">Zwraca&nbsp;numer&nbsp;rundy</span></dd></dl>
+
+<dl><dt><a name="Board-get_size"><strong>get_size</strong></a>(self) -&gt; tuple</dt><dd><span class="code">Zwraca&nbsp;rozmiar&nbsp;planszy</span></dd></dl>
+
+<dl><dt><a name="Board-get_total_object_count"><strong>get_total_object_count</strong></a>(self) -&gt; int</dt><dd><span class="code">Zwraca&nbsp;liczbę&nbsp;wszystkich&nbsp;obiektów</span></dd></dl>
+
+<dl><dt><a name="Board-populate"><strong>populate</strong></a>(self, animal: ecosystem_simulation.objects.animals.Animal) -&gt; None</dt><dd><span class="code">Dodaje&nbsp;zwierzę&nbsp;do&nbsp;planszy&nbsp;na&nbsp;podstawie&nbsp;innego&nbsp;zwierzęcia<br>
+&nbsp;<br>
+:param&nbsp;animal:&nbsp;zwierzę,&nbsp;na&nbsp;podstawie&nbsp;którego&nbsp;zostanie&nbsp;dodane&nbsp;nowe&nbsp;zwierzę</span></dd></dl>
+
+<dl><dt><a name="Board-remove"><strong>remove</strong></a>(self, obj) -&gt; None</dt><dd><span class="code">Usuwa&nbsp;obiekt&nbsp;z&nbsp;planszy<br>
+&nbsp;<br>
+:param&nbsp;obj:&nbsp;obiekt&nbsp;do&nbsp;usunięcia</span></dd></dl>
+
+<dl><dt><a name="Board-update"><strong>update</strong></a>(self) -&gt; None</dt><dd><span class="code">Aktualizuje&nbsp;stan&nbsp;planszy</span></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</span></dd>
+</dl>
+</td></tr></table> <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="BoardSize">class <strong>BoardSize</strong></a>(<a href="builtins.html#object">builtins.object</a>)</td></tr>
+    
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code"><a href="#BoardSize">BoardSize</a>(width:&nbsp;int,&nbsp;height:&nbsp;int)&nbsp;-&amp;gt;&nbsp;None<br>
+&nbsp;<br>
+Klasa&nbsp;reprezentująca&nbsp;rozmiar&nbsp;planszy<br>&nbsp;</span></td></tr>
+<tr><td>&nbsp;</td>
+<td class="singlecolumn">Methods defined here:<br>
+<dl><dt><a name="BoardSize-__init__"><strong>__init__</strong></a>(self, width: int, height: int) -&gt; None</dt><dd><span class="code">Konstruktor&nbsp;klasy&nbsp;<a href="#BoardSize">BoardSize</a><br>
+&nbsp;<br>
+:param&nbsp;width:&nbsp;szerokość&nbsp;planszy<br>
+:param&nbsp;height:&nbsp;wysokość&nbsp;planszy</span></dd></dl>
+
+<dl><dt><a name="BoardSize-get_area"><strong>get_area</strong></a>(self) -&gt; int</dt><dd><span class="code">Zwraca&nbsp;powierzchnię&nbsp;planszy<br>
+&nbsp;<br>
+:return:&nbsp;powierzchnia&nbsp;planszy</span></dd></dl>
+
+<dl><dt><a name="BoardSize-get_size"><strong>get_size</strong></a>(self) -&gt; tuple</dt><dd><span class="code">Zwraca&nbsp;rozmiar&nbsp;planszy<br>
+&nbsp;<br>
+:return:&nbsp;krotka&nbsp;(szerokość,&nbsp;wysokość)</span></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</span></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
+    
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>GENDER_FEMALE</strong> = False<br>
+<strong>GENDER_MALE</strong> = True</td></tr></table>
+</body></html>
