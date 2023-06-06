@@ -15,9 +15,9 @@ TODO:
 
     - [x] dodać komentarze
     - [ ] dodać testy
-    - [ ] dodać dokumentację
+    - [x] dodać dokumentację
     - [ ] dodać możliwość zapisu i wczytywania stanu symulacji (pickle)
-    - [ ] dodać generowanie logów do pliku (logging)
+    - [x] dodać generowanie logów do pliku (logging)
     - [ ] dodać metody dodawania osobno drapieżników, ofiar i bobrów
     - [ ] dodać tworzenie wykresów ilości populacji w czasie
 
@@ -165,9 +165,10 @@ class Board:
             # nie udało się wygenerować losowych współrzędnych
             return (-1, -1)
 
-    def add_random_animal(self) -> None:
+    def add_random_animal(self, spieces=None) -> None:
         """Dodaje losowe zwierzę"""
-        species = choice(list(self.__possible_animals.keys()))
+        if spieces is None or spieces not in self.__possible_animals.keys():
+            species = choice(list(self.__possible_animals.keys()))
         
         x, y = self.__generate_random_position()
         if x == -1 or y == -1:
@@ -201,6 +202,7 @@ class Board:
 
     def add_random_item(self) -> None:
         """Dodaje losowy przedmiot"""
+
         category = choice(list(self.__possible_items.keys()))
 
         x, y = self.__generate_random_position()
@@ -217,6 +219,20 @@ class Board:
 
         self.__objects.add(item)
         self.__total_object_count += 1
+
+    def add_predator(self) -> None:
+        """Dodaje drapieżnika"""
+        spieces = choice(("Wolf, Eagle"))
+        self.add_random_animal(spieces=spieces)
+
+    def add_prey(self) -> None:
+        """Dodaje ofiarę"""
+        cat = choice(("Deer", "Mouse"))
+        self.add_random_animal(spieces=spieces)
+
+    def add_beaver(self) -> None:
+        """Dodaje bobra"""
+        self.add_random_animal(spieces="Beaver")
     
     def populate(self, animal: Animal) -> None:
         """Dodaje zwierzę do planszy na podstawie innego zwierzęcia
