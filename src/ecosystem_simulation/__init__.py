@@ -18,8 +18,8 @@ TODO:
     - [x] dodać dokumentację
     - [ ] dodać możliwość zapisu i wczytywania stanu symulacji (pickle)
     - [x] dodać generowanie logów do pliku (logging)
-    - [ ] dodać metody dodawania osobno drapieżników, ofiar i bobrów
-    - [ ] dodać tworzenie wykresów ilości populacji w czasie
+    - [x] dodać metody dodawania osobno drapieżników, ofiar i bobrów
+    - [ ] dodać tworzenie wykresów ilości populacji w czasie?
 
 """
 
@@ -384,7 +384,18 @@ class Board:
                     if objects_nearby is obj:
                         # jeśli obiekt jest sam ze sobą, pomijamy go
                         continue
-                    if issubclass(obj.__class__, Prey) and issubclass(object_nearby.__class__, Predator):
+                    if obj.__class__ == object_nearby.__class__:
+                        # jeśli obiekt jest tego samego typu, próbujemy się rozmnożyć
+                        if obj.can_reproduce_with(object_nearby):
+                            if obj.get_position() == object_nearby.get_position():
+                                # jeśli zwierzę jest w tym samym miejscu, rozmnażamy się
+                                self.populate(obj)
+                                logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has reproduced with {type(object_nearby).__name__}{object_nearby.get_position()} ]')
+                            else:
+                                # poruszamy się w kierunku partnera
+                                x, y = self.__move_towards_object(obj, object_nearby)
+                            break
+                    elif issubclass(obj.__class__, Prey) and issubclass(object_nearby.__class__, Predator):
                         # jeśli obiekt jest ofiarą, a obiekt w zasięgu widzenia jest drapieżnikiem, uciekamy
                         if object_nearby.get_hit_points() <= 0:
                             # jeśli drapieżnik nie ma już punktów życia, pomijamy go
@@ -394,7 +405,7 @@ class Board:
                         if obj.get_position() == object_nearby.get_position():
                             # jeśli ofiara i drapieżnik są w tym samym miejscu, atakujemy
                             obj.defend(object_nearby)
-                            logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has been attacked by {type(object_nearby).__name__}{object_nearby.get_position()} ]')
+                            logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} defends against {type(object_nearby).__name__}{object_nearby.get_position()} ]')
                         else:
                             # uciekamy
                             x, y = obj.run(object_nearby)
@@ -413,6 +424,12 @@ class Board:
                                 # jeśli ofiara ma jeszcze punkty życia, atakujemy
                                 obj.attack(object_nearby)
                                 logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has attacked {type(object_nearby).__name__}{object_nearby.get_position()} ]')
+
+                                if object_nearby.get_hit_points() <= 0:
+                                    # jeśli ofiara nie ma już punktów życia, zjadamy ją
+                                    obj.eat(object_nearby)
+                                    self.remove(object_nearby)
+                                    logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has eaten {type(object_nearby).__name__}{object_nearby.get_position()} ]')
                         else:
                             # polujemy na ofiarę
                             x, y = obj.hunt(object_nearby)
@@ -453,17 +470,6 @@ class Board:
                             # poruszamy się w kierunku wody
                             x, y = self.__move_towards_object(obj, object_nearby)
                         break
-                    elif obj.__class__ == object_nearby.__class__:
-                        # jeśli obiekt jest tego samego typu, próbujemy się rozmnożyć
-                        if obj.can_reproduce_with(object_nearby):
-                            if obj.get_position() == object_nearby.get_position():
-                                # jeśli zwierzę jest w tym samym miejscu, rozmnażamy się
-                                self.populate(obj)
-                                logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has reproduced with {type(object_nearby).__name__}{object_nearby.get_position()} ]')
-                            else:
-                                # poruszamy się w kierunku partnera
-                                x, y = self.__move_towards_object(obj, object_nearby)
-                            break
                 else:
                     # jeśli nie znaleziono żadnego obiektu w zasięgu widzenia, losowo poruszamy się po mapie
                     x, y = randint(1, self.__size.get_size()[0] - 1), randint(1, self.__size.get_size()[1] - 1)
