@@ -10,20 +10,6 @@ from .objects.animals.preys import *
 from .utils import *
 
 
-"""
-TODO:
-
-    - [x] dodać komentarze
-    - [ ] dodać testy
-    - [x] dodać dokumentację
-    - [ ] dodać możliwość zapisu i wczytywania stanu symulacji (pickle)
-    - [x] dodać generowanie logów do pliku (logging)
-    - [x] dodać metody dodawania osobno drapieżników, ofiar i bobrów
-    - [ ] dodać tworzenie wykresów ilości populacji w czasie?
-
-"""
-
-
 class BoardSize:
     """Klasa reprezentująca rozmiar planszy"""
 
@@ -135,11 +121,11 @@ class Board:
     def get_grid(self) -> list:
         """Zwraca planszę"""
         self.__set_grid()
-        return deepcopy(self.__grid)
+        return self.__grid
     
     def get_objects(self) -> set:
         """Zwraca zbiór wszystkich obiektów"""
-        return deepcopy(self.__objects)
+        return self.__objects
     
     def get_round(self) -> int:
         """Zwraca numer rundy"""
@@ -169,6 +155,8 @@ class Board:
         """Dodaje losowe zwierzę"""
         if spieces is None or spieces not in self.__possible_animals.keys():
             species = choice(list(self.__possible_animals.keys()))
+        else:
+            species = spieces
         
         x, y = self.__generate_random_position()
         if x == -1 or y == -1:
@@ -222,12 +210,12 @@ class Board:
 
     def add_predator(self) -> None:
         """Dodaje drapieżnika"""
-        spieces = choice(("Wolf, Eagle"))
+        spieces = choice(["Wolf, Eagle"])
         self.add_random_animal(spieces=spieces)
 
     def add_prey(self) -> None:
         """Dodaje ofiarę"""
-        cat = choice(("Deer", "Mouse"))
+        spieces = choice(["Deer", "Mouse"])
         self.add_random_animal(spieces=spieces)
 
     def add_beaver(self) -> None:

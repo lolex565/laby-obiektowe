@@ -7,14 +7,41 @@ from ecosystem_simulation.objects.animals.predators import *
 
 
 if __name__ == "__main__":
-    board = Board(BoardSize(20, 20))
+    height = min(int(input("Podaj wysokość planszy: ")), 20)
+    width = min(int(input("Podaj szerokość planszy: ")), 40)
+
+    predators_num = min(int(input("Podaj liczbę drapieżników: ")), 500)
+    preys_num = min(int(input("Podaj liczbę ofiar: ")), 600)
+    beavers_num = int(input("Podaj liczbę bobrów: "), 400)
+
+    items_num = int(input("Podaj liczbę obiektów nieożywionych: "), 1000)
+
+    print("Przygotowywanie symulacji...")
+
+    # tworzymy planszę
+    print("Tworzenie planszy...")
+    board = Board(BoardSize(width, height))
 
     # dodajemy zwierzęta
-    for _ in range(50):
-        board.add_random_animal()
+
+    # dodajemy drapieżniki
+    print("Dodawanie drapieżników...")
+    for _ in range(predators_num):
+        board.add_predator()
+
+    # dodajemy ofiary
+    print("Dodawanie ofiar...")
+    for _ in range(preys_num):
+        board.add_prey()
+
+    # dodajemy bobry
+    print("Dodawanie bobrów...")
+    for _ in range(beavers_num):
+        board.add_beaver()
 
     # dodajemy obiekty nieożywione
-    for _ in range(40):
+    print("Dodawanie obiektów nieożywionych...")
+    for _ in range(items_num):
         board.add_random_item()
 
     print(board)
@@ -26,15 +53,15 @@ if __name__ == "__main__":
     print(board)
     try:
         while not (end := board.check_end_conditions()):
-            os.system(clear_screen_cmd)
             board.update()
+            os.system(clear_screen_cmd)
             print(board)
             print("-" * board.get_size()[0])
             print("Tura = ", board.get_round())
             print("Populacja = ", board.get_population())
             print("Żywe drapieżniki = ", board.get_predators())
             print("Żywe ofiary = ", board.get_preys())
-            time.sleep(0.4)
+            time.sleep(0.1)
         else:
             print(f"Przyczyna zakończenia symulacji: {end}")
     except KeyboardInterrupt:
