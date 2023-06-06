@@ -5,8 +5,8 @@
 .idea/vcs.xml
 .idea/inspectionProfiles/profiles_settings.xml
 */venv/*
+logs/*
+*.log
+*.pyc
 */__pycache__/*
-src/ecosystem_simulation/__pycache__/*
-src/ecosystem_simulation/objects/__pycache__/*
-src/ecosystem_simulation/objects/animals/__pycache__/*
-src/ecosystem_simulation/objects/items/__pycache__/*
+

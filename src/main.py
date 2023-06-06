@@ -1,4 +1,4 @@
-import pickle, platform, os, time, logging
+import pickle, platform, os, time
 
 from ecosystem_simulation import Board, BoardSize
 from ecosystem_simulation.objects.animals import *
@@ -7,26 +7,41 @@ from ecosystem_simulation.objects.animals.predators import *
 
 
 if __name__ == "__main__":
-    print("Compiles!")
+    height = min(int(input("Podaj wysokość planszy: ")), 20)
+    width = min(int(input("Podaj szerokość planszy: ")), 40)
 
-    predator = Wolf(0, 0, 5.6, 20, 3, 100, 100, GENDER_MALE, 10, 50, 20)
-    prey = Mouse(0, 0, 0.1, 10, 1, 100, 100, GENDER_FEMALE, 10, 1, 10)
-    print(predator.get_hit_points())
-    print(prey.get_hit_points())
-    predator.attack(prey)
-    print(prey.get_hit_points())
-    prey.defend(predator)
-    print(predator.get_durability())
-    print(predator.get_hit_points())
+    predators_num = min(int(input("Podaj liczbę drapieżników: ")), 500)
+    preys_num = min(int(input("Podaj liczbę ofiar: ")), 600)
+    beavers_num = int(input("Podaj liczbę bobrów: "), 400)
 
-    board = Board(BoardSize(20, 20))
+    items_num = int(input("Podaj liczbę obiektów nieożywionych: "), 1000)
+
+    print("Przygotowywanie symulacji...")
+
+    # tworzymy planszę
+    print("Tworzenie planszy...")
+    board = Board(BoardSize(width, height))
 
     # dodajemy zwierzęta
-    for _ in range(50):
-        board.add_random_animal()
+
+    # dodajemy drapieżniki
+    print("Dodawanie drapieżników...")
+    for _ in range(predators_num):
+        board.add_predator()
+
+    # dodajemy ofiary
+    print("Dodawanie ofiar...")
+    for _ in range(preys_num):
+        board.add_prey()
+
+    # dodajemy bobry
+    print("Dodawanie bobrów...")
+    for _ in range(beavers_num):
+        board.add_beaver()
 
     # dodajemy obiekty nieożywione
-    for _ in range(40):
+    print("Dodawanie obiektów nieożywionych...")
+    for _ in range(items_num):
         board.add_random_item()
 
     print(board)
@@ -36,14 +51,18 @@ if __name__ == "__main__":
     clear_screen_cmd = "cls" if platform.system() == "Windows" else "clear"
 
     print(board)
-    while not (end := board.check_end_conditions()):
-        os.system(clear_screen_cmd)
-        board.update()
-        print(board)
-        print("-" * board.get_size()[0])
-        print("Populacja = ", board.get_population())
-        print("Żywe drapieżniki = ", board.get_predators())
-        print("Żywe ofiary = ", board.get_preys())
-        time.sleep(0.4)
-    else:
-        print(f"Przyczyna zakończenia symulacji: {end}")
+    try:
+        while not (end := board.check_end_conditions()):
+            board.update()
+            os.system(clear_screen_cmd)
+            print(board)
+            print("-" * board.get_size()[0])
+            print("Tura = ", board.get_round())
+            print("Populacja = ", board.get_population())
+            print("Żywe drapieżniki = ", board.get_predators())
+            print("Żywe ofiary = ", board.get_preys())
+            time.sleep(0.1)
+        else:
+            print(f"Przyczyna zakończenia symulacji: {end}")
+    except KeyboardInterrupt:
+        print("Przerwano symulację")

@@ -1,6 +1,6 @@
 import sys
 
-sys.path.append('..')
+sys.path.append('../..')
 
 from ecosystem_simulation.objects import Object
 from ecosystem_simulation.objects.items import Plant, Water

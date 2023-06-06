@@ -1,27 +1,13 @@
 from copy import deepcopy
 from random import randint, choice, uniform
-import math
+import math, logging, time
 
-from ecosystem_simulation.objects.items import *
-from ecosystem_simulation.objects.animals import *
-from ecosystem_simulation.objects.animals.beaver import Beaver
-from ecosystem_simulation.objects.animals.predators import *
-from ecosystem_simulation.objects.animals.preys import *
-from ecosystem_simulation.utils import *
-
-
-"""
-TODO:
-
-    - [ ] dodać komentarze
-    - [ ] dodać testy
-    - [ ] dodać dokumentację
-    - [ ] dodać możliwość zapisu i wczytywania stanu symulacji (pickle)
-    - [ ] dodać generowanie logów do pliku (logging)
-    - [ ] dodać metody dodawania osobno drapieżników, ofiar i bobrów
-    - [ ] dodać tworzenie wykresów ilości populacji w czasie
-
-"""
+from .objects.items import *
+from .objects.animals import *
+from .objects.animals.beaver import Beaver
+from .objects.animals.predators import *
+from .objects.animals.preys import *
+from .utils import *
 
 
 class BoardSize:
@@ -88,6 +74,8 @@ class Board:
         self.__size = size
         self.__grid = [[None for _ in range(self.__size.get_size()[0])] for _ in range(self.__size.get_size()[1])]
 
+        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s', filename='logs/simulation_%s.log' % time.strftime("%Y-%m-%d_%H", time.localtime()), filemode='a')
+
     def __str__(self) -> str:
         """Zwraca planszę w postaci stringa"""
         grid_str = [[str(cell) if cell is not None else name_to_emoji("Dirt") for cell in row] for row in self.get_grid()]
@@ -133,11 +121,11 @@ class Board:
     def get_grid(self) -> list:
         """Zwraca planszę"""
         self.__set_grid()
-        return deepcopy(self.__grid)
+        return self.__grid
     
     def get_objects(self) -> set:
         """Zwraca zbiór wszystkich obiektów"""
-        return deepcopy(self.__objects)
+        return self.__objects
     
     def get_round(self) -> int:
         """Zwraca numer rundy"""
@@ -163,9 +151,12 @@ class Board:
             # nie udało się wygenerować losowych współrzędnych
             return (-1, -1)
 
-    def add_random_animal(self) -> None:
+    def add_random_animal(self, spieces=None) -> None:
         """Dodaje losowe zwierzę"""
-        species = choice(list(self.__possible_animals.keys()))
+        if spieces is None or spieces not in self.__possible_animals.keys():
+            species = choice(list(self.__possible_animals.keys()))
+        else:
+            species = spieces
         
         x, y = self.__generate_random_position()
         if x == -1 or y == -1:
@@ -199,6 +190,7 @@ class Board:
 
     def add_random_item(self) -> None:
         """Dodaje losowy przedmiot"""
+
         category = choice(list(self.__possible_items.keys()))
 
         x, y = self.__generate_random_position()
@@ -215,6 +207,20 @@ class Board:
 
         self.__objects.add(item)
         self.__total_object_count += 1
+
+    def add_predator(self) -> None:
+        """Dodaje drapieżnika"""
+        spieces = choice(["Wolf, Eagle"])
+        self.add_random_animal(spieces=spieces)
+
+    def add_prey(self) -> None:
+        """Dodaje ofiarę"""
+        spieces = choice(["Deer", "Mouse"])
+        self.add_random_animal(spieces=spieces)
+
+    def add_beaver(self) -> None:
+        """Dodaje bobra"""
+        self.add_random_animal(spieces="Beaver")
     
     def populate(self, animal: Animal) -> None:
         """Dodaje zwierzę do planszy na podstawie innego zwierzęcia
@@ -258,9 +264,10 @@ class Board:
             self.__predators = max(self.__predators, 0)
             self.__population -= 1
         if issubclass(obj.__class__, Prey):
-            self.__preys -= 1
-            self.__preys = max(self.__preys, 0)
-            self.__population -= 1
+            if not obj.is_dead():
+                self.__preys -= 1
+                self.__preys = max(self.__preys, 0)
+                self.__population -= 1
         if isinstance(obj, Beaver):
             self.__population -= 1
         self.__total_object_count -= 1
@@ -344,8 +351,14 @@ class Board:
                 if obj.get_hit_points() <= 0:
                     # jeśli zwierzę nie ma już punktów życia, usuwamy go
                     if not issubclass(obj.__class__, Prey):
-                        self.__preys -= 1
                         self.remove(obj)
+                        logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has been removed ]')
+                    else:
+                        obj.die()
+                        self.__preys -= 1
+                        self.__preys = max(self.__preys, 0)
+                        self.__population -= 1
+                        logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has died ]')
                     continue
 
                 # rozglądamy się w poszukiwaniu obiektów w zasięgu widzenia
@@ -359,19 +372,33 @@ class Board:
                     if objects_nearby is obj:
                         # jeśli obiekt jest sam ze sobą, pomijamy go
                         continue
-                    if issubclass(obj.__class__, Prey) and issubclass(object_nearby.__class__, Predator):
+                    if obj.__class__ == object_nearby.__class__:
+                        # jeśli obiekt jest tego samego typu, próbujemy się rozmnożyć
+                        if obj.can_reproduce_with(object_nearby):
+                            if obj.get_position() == object_nearby.get_position():
+                                # jeśli zwierzę jest w tym samym miejscu, rozmnażamy się
+                                self.populate(obj)
+                                logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has reproduced with {type(object_nearby).__name__}{object_nearby.get_position()} ]')
+                            else:
+                                # poruszamy się w kierunku partnera
+                                x, y = self.__move_towards_object(obj, object_nearby)
+                            break
+                    elif issubclass(obj.__class__, Prey) and issubclass(object_nearby.__class__, Predator):
                         # jeśli obiekt jest ofiarą, a obiekt w zasięgu widzenia jest drapieżnikiem, uciekamy
                         if object_nearby.get_hit_points() <= 0:
                             # jeśli drapieżnik nie ma już punktów życia, pomijamy go
                             self.remove(object_nearby)
+                            logging.info(f'[ Round {self.get_round()}: {type(object_nearby).__name__}{object_nearby.get_position()} has been removed ]')
                             continue
                         if obj.get_position() == object_nearby.get_position():
                             # jeśli ofiara i drapieżnik są w tym samym miejscu, atakujemy
                             obj.defend(object_nearby)
+                            logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} defends against {type(object_nearby).__name__}{object_nearby.get_position()} ]')
                         else:
                             # uciekamy
                             x, y = obj.run(object_nearby)
                             x, y = self.__correct_position(x, y)
+                            logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} runs away from {type(object_nearby).__name__}{object_nearby.get_position()} ]')
                         break
                     elif issubclass(obj.__class__, Predator) and issubclass(object_nearby.__class__, Prey):
                         # jeśli obiekt jest drapieżnikiem, a obiekt w zasięgu widzenia jest ofiarą, atakujemy
@@ -380,19 +407,29 @@ class Board:
                                 # jeśli ofiara nie ma już punktów życia, zjadamy ją
                                 obj.eat(object_nearby)
                                 self.remove(object_nearby)
+                                logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has eaten {type(object_nearby).__name__}{object_nearby.get_position()} ]')
                             else:
                                 # jeśli ofiara ma jeszcze punkty życia, atakujemy
                                 obj.attack(object_nearby)
+                                logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has attacked {type(object_nearby).__name__}{object_nearby.get_position()} ]')
+
+                                if object_nearby.get_hit_points() <= 0:
+                                    # jeśli ofiara nie ma już punktów życia, zjadamy ją
+                                    obj.eat(object_nearby)
+                                    self.remove(object_nearby)
+                                    logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has eaten {type(object_nearby).__name__}{object_nearby.get_position()} ]')
                         else:
                             # polujemy na ofiarę
                             x, y = obj.hunt(object_nearby)
                             x, y = self.__move_towards_object(obj, object_nearby)
+                            logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} hunts {type(object_nearby).__name__}{object_nearby.get_position()} ]')
                         break
                     elif isinstance(obj, Beaver) and isinstance(object_nearby, Tree):
                         # jeśli obiekt jest bobrem, a obiekt w zasięgu widzenia jest drzewem, jemy je
                         if obj.get_position() == object_nearby.get_position():
                             obj.eat(object_nearby)
                             self.remove(object_nearby)
+                            logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has eaten {type(object_nearby).__name__}{object_nearby.get_position()} ]')
                         else:
                             # poruszamy się w kierunku drzewa
                             x, y = self.__move_towards_object(obj, object_nearby)
@@ -402,33 +439,25 @@ class Board:
                         if obj.get_position() == object_nearby.get_position():
                             obj.eat(object_nearby)
                             self.remove(object_nearby)
+                            logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has eaten {type(object_nearby).__name__}{object_nearby.get_position()} ]')
                         else:
                             # poruszamy się w kierunku rośliny
                             x, y = self.__move_towards_object(obj, object_nearby)
                         break
                     elif isinstance(object_nearby, Water):
                         # jeśli obiekt jest wodą, pijemy ją
-                        if obj.get_thirst() >= 90:
+                        if obj.get_thirst() >= 70:
                             # jeśli zwierzę jest nawodnione, pomijamy ją
                             continue
                         if obj.get_position() == object_nearby.get_position():
                             # jeśli zwierzę jest w tym samym miejscu, pijemy
                             obj.drink(object_nearby)
                             self.remove(object_nearby)
+                            logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has drunk {type(object_nearby).__name__}{object_nearby.get_position()} ]')
                         else:
                             # poruszamy się w kierunku wody
                             x, y = self.__move_towards_object(obj, object_nearby)
                         break
-                    elif obj.__class__ == object_nearby.__class__:
-                        # jeśli obiekt jest tego samego typu, próbujemy się rozmnożyć
-                        if obj.can_reproduce_with(object_nearby):
-                            if obj.get_position() == object_nearby.get_position():
-                                # jeśli zwierzę jest w tym samym miejscu, rozmnażamy się
-                                self.populate(obj)
-                            else:
-                                # poruszamy się w kierunku partnera
-                                x, y = self.__move_towards_object(obj, object_nearby)
-                            break
                 else:
                     # jeśli nie znaleziono żadnego obiektu w zasięgu widzenia, losowo poruszamy się po mapie
                     x, y = randint(1, self.__size.get_size()[0] - 1), randint(1, self.__size.get_size()[1] - 1)
@@ -455,9 +484,12 @@ class Board:
         - cała populacja jest równa 0
         """
         if self.__population <= 0:
-            return f"Wszystkie zwierzęta umarły"
+            logging.info(f'[ Round {self.get_round()}: Simulation has ended - All animals have died ]')
+            return "Wszystkie zwierzęta umarły"
         if self.__predators <= 0:
-            return f"Wszystkie drapieżniki umarły"
+            logging.info(f'[ Round {self.get_round()}: Simulation has ended - All predators have died ]')
+            return "Wszystkie drapieżniki umarły"
         if self.__preys <= 0:
-            return f"Wszystkie ofiary umarły"
+            logging.info(f'[ Round {self.get_round()}: Simulation has ended - All preys have died ]')
+            return "Wszystkie ofiary umarły"
         return False

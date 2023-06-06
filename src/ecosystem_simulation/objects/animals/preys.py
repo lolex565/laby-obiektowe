@@ -1,6 +1,6 @@
 import sys
 
-sys.path.append('..')
+sys.path.append('../..')
 
 from . import Animal
 from ecosystem_simulation.utils import move_away_from_point
@@ -8,6 +8,8 @@ from ecosystem_simulation.utils import move_away_from_point
 
 class Prey(Animal):
     """Klasa bazowa dla wszystkich zwierząt roślinożernych"""
+
+    __is_dead = False  # czy zwierzę zostało zjedzone
 
 
     def __init__(self, x: int, y: int, weight: float, speed: int,
@@ -56,6 +58,14 @@ class Prey(Animal):
     def make_sound(self) -> int:
         """Wydanie dźwięku"""
         return self.get_fear() + self.get_weight() + self.get_strenght()
+    
+    def is_dead(self) -> bool:
+        """Sprawdza, czy zwierzę zostało zjedzone"""
+        return self.__is_dead
+    
+    def die(self) -> None:
+        """Zabija zwierzę"""
+        self.__is_eaten = True
 
     
 class Mouse(Prey):

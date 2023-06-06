@@ -1,6 +1,6 @@
 import sys
 
-sys.path.append('..')
+sys.path.append('../..')
 
 from . import Animal
 from ecosystem_simulation.utils import move_towards_point
