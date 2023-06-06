@@ -32,9 +32,20 @@ Zwierzęta będą mogły pić.
 
 Najpierw należy sklonoać repozytorium:
 
-```git clone https://github.com/lolex565/laby-obiektowe.git```
+```
+git clone https://github.com/lolex565/laby-obiektowe.git
+```
 
 Aby uruchomić program należy wpisać w terminalu będąc w katalogu projektu:
 
+- dodać uprawnienia do uruchamiania skryptów `bash`:
 
-```python3 src/main.py```
+```
+chmod +x *.sh
+```
+
+- uruchomić skrypt `run.sh`:
+
+```
+./run.sh
+```
