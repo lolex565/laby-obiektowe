@@ -126,7 +126,7 @@ class Animal(Object):
         :param partner: partner do rozmnażania
         """
         if type(self).__name__ == type(partner).__name__:
-            if self.get_gender() != self.get_gender():
+            if self.get_gender() != partner.get_gender():
                 if self.get_hit_points() >= 0 and partner.get_hit_points() >= 0:
                     return True
         return False
