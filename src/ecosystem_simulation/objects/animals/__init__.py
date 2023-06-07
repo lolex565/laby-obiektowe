@@ -13,6 +13,8 @@ GENDER_FEMALE = False   # płeć żeńska
 class Animal(Object):
     """Klasa bazowa dla wszystkich zwierząt w symulacji"""
 
+    __reproduced = False
+
     def __init__(self, x: int, y: int, weight: float, speed: int,
                  age: int, thirst: int, satiety: int, gender: bool, view_range: int,
                 strenght: int, hit_points: int = 100) -> None:
@@ -47,6 +49,14 @@ class Animal(Object):
     def get_age(self) -> int:
         """Zwraca wiek zwierzęcia"""
         return self.__age
+    
+    def has_reproduced(self) -> bool:
+        """Sprawdza, czy zwierzę się już rozmnożyło"""
+        return self.__reproduced
+    
+    def reproduce(self) -> None:
+        """Zaznacza, że zwierze się rozmnożyło"""
+        self.__reproduced = True
     
     def set_age(self, age: int) -> None:
         """Ustawia wiek zwierzęcia
@@ -93,7 +103,7 @@ class Animal(Object):
         :param y: współrzędna y
         """
 
-        energy_lost = int((abs(self.get_position()[0] - x) + abs(self.get_position()[1] - y)) % 10)
+        energy_lost = int((abs(self.get_position()[0] - x) + abs(self.get_position()[1] - y))) % 2
         if self.__satiety == 0 or self.__thirst == 0:
             self.__hit_points -= energy_lost
             self.__hit_points = int(max(self.__hit_points, 0))
@@ -126,10 +136,11 @@ class Animal(Object):
         :param partner: partner do rozmnażania
         """
         if type(self).__name__ == type(partner).__name__:
-            if self.get_gender() != self.get_gender():
-                if self.get_age() >= 5 and partner.get_age() >= 5:
-                    if self.get_hit_points() >= 0 and partner.get_hit_points() >= 0:
-                        return True
+            if self.get_gender() != partner.get_gender():
+                if self.get_hit_points() > 0 and partner.get_hit_points() > 0:
+                    if self.get_age() >= 5 and partner.get_age() >= 5:
+                        if not self.has_reproduced() and not partner.has_reproduced():
+                            return True
         return False
 
     def get_durability(self) -> int:

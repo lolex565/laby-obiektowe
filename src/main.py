@@ -12,9 +12,9 @@ if __name__ == "__main__":
 
     predators_num = min(int(input("Podaj liczbę drapieżników: ")), 500)
     preys_num = min(int(input("Podaj liczbę ofiar: ")), 600)
-    beavers_num = int(input("Podaj liczbę bobrów: "), 400)
+    beavers_num = min(int(input("Podaj liczbę bobrów: ")), 400)
 
-    items_num = int(input("Podaj liczbę obiektów nieożywionych: "), 1000)
+    items_num = min(int(input("Podaj liczbę obiektów nieożywionych: ")), 1000)
 
     print("Przygotowywanie symulacji...")
 
@@ -44,12 +44,12 @@ if __name__ == "__main__":
     for _ in range(items_num):
         board.add_random_item()
 
-    print(board)
-
     # komenda czyszcząca ekran
     # cls dla Windows, clear dla Linux/Unix
     clear_screen_cmd = "cls" if platform.system() == "Windows" else "clear"
-
+    
+    print("Rozpoczynanie symulacji...")
+    os.system(clear_screen_cmd)
     print(board)
     try:
         while not (end := board.check_end_conditions()):
