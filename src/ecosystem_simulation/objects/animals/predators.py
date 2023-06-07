@@ -50,7 +50,7 @@ class Predator(Animal):
         
         :param prey: ofiara
         """
-        prey.set_damage(int(self.get_strenght()))
+        prey.set_damage(int(self.get_strenght() * self.get_anger() + self.get_weight()))
 
     def make_sound(self) -> int:
         """Wydanie dźwięku"""

@@ -143,12 +143,11 @@ class Board:
         x, y = randint(0, self.__size.get_size()[0] -1), randint(0, self.__size.get_size()[1] - 1)
         return (x, y)
 
-    def add_random_animal(self, spieces=None) -> None:
+    def add_random_animal(self, species=None) -> None:
         """Dodaje losowe zwierzę"""
-        if spieces is None or spieces not in self.__possible_animals.keys():
+        if species not in self.__possible_animals:
+            raise Exception(species)
             species = choice(list(self.__possible_animals.keys()))
-        else:
-            species = spieces
         
         x, y = self.__generate_random_position()
 
@@ -183,8 +182,6 @@ class Board:
         category = choice(list(self.__possible_items.keys()))
 
         x, y = self.__generate_random_position()
-        if x == -1 or y == -1:
-            return
         
         item = eval(category)(
             x=x,
@@ -199,17 +196,17 @@ class Board:
 
     def add_predator(self) -> None:
         """Dodaje drapieżnika"""
-        spieces = choice(["Wolf, Eagle"])
-        self.add_random_animal(spieces=spieces)
+        species = choice(["Wolf", "Eagle"])
+        self.add_random_animal(species=species)
 
     def add_prey(self) -> None:
         """Dodaje ofiarę"""
-        spieces = choice(["Deer", "Mouse"])
-        self.add_random_animal(spieces=spieces)
+        species = choice(["Deer", "Mouse"])
+        self.add_random_animal(species=species)
 
     def add_beaver(self) -> None:
         """Dodaje bobra"""
-        self.add_random_animal(spieces="Beaver")
+        self.add_random_animal(species="Beaver")
     
     def populate(self, animal: Animal) -> None:
         """Dodaje zwierzę do planszy na podstawie innego zwierzęcia
@@ -369,7 +366,7 @@ class Board:
                             x, y = self.__correct_position(x, y)
                             logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} runs away from {type(object_nearby).__name__}{object_nearby.get_position()} ]')
                         break
-                    elif issubclass(obj.__class__, Predator) and issubclass(object_nearby.__class__, Prey) and obj.get_satiety() < 50:
+                    elif issubclass(obj.__class__, Predator) and issubclass(object_nearby.__class__, Prey):
                         # jeśli obiekt jest drapieżnikiem, a obiekt w zasięgu widzenia jest ofiarą, atakujemy
                         if obj.get_position() == object_nearby.get_position():
                             if object_nearby.get_hit_points() <= 0:

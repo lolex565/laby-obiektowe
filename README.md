@@ -2,7 +2,7 @@
 
 ## specyfika
 
-W aktualnej fazie pierwotnej, projekt tworzony jest w języku python, w dalszym etapie planowane jest dodane funkcjonalności np. tworzenia wykresów.
+Projekt tworzony jest w języku Python bez wykorzystania zewnętrznych bibliotek.
 
 ## Członkowie zespołu
 
