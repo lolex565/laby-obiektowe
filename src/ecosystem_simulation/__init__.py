@@ -344,11 +344,6 @@ class Board:
                     if objects_nearby is obj:
                         # jeśli obiekt jest sam ze sobą, pomijamy go
                         continue
-                    # jeśli obiekt jest tego samego typu, próbujemy się rozmnożyć
-                    if obj.can_reproduce_with(object_nearby):
-                        self.populate(obj)
-                        logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has reproduced with {type(object_nearby).__name__}{object_nearby.get_position()} ]')
-                        break
                     elif issubclass(obj.__class__, Prey) and issubclass(object_nearby.__class__, Predator):
                         # jeśli obiekt jest ofiarą, a obiekt w zasięgu widzenia jest drapieżnikiem, uciekamy
                         if object_nearby.get_hit_points() <= 0:
@@ -422,6 +417,19 @@ class Board:
                             logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has drunk {type(object_nearby).__name__}{object_nearby.get_position()} ]')
                         else:
                             # poruszamy się w kierunku wody
+                            x, y = self.__move_towards_object(obj, object_nearby)
+                        break
+                    # jeśli obiekt jest tego samego typu, próbujemy się rozmnożyć
+                    elif obj.can_reproduce_with(object_nearby):
+                        if obj.get_position() == object_nearby.get_position():
+                            obj.reproduce()
+                            object_nearby.reproduce()
+                            self.populate(obj)
+                            logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has reproduced with {type(object_nearby).__name__}{object_nearby.get_position()} ]')
+                            x, y = move_away_from_point(*obj.get_position(), *object_nearby.get_position(), obj.get_speed())
+                            x, y = self.__correct_position(x, y)
+                        else:
+                            # poruszamy się w kierunku partnera
                             x, y = self.__move_towards_object(obj, object_nearby)
                         break
                 else:
