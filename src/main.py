@@ -7,8 +7,8 @@ from ecosystem_simulation.objects.animals.predators import *
 
 
 if __name__ == "__main__":
-    height = min(int(input("Podaj wysokość planszy: ")), 20)
-    width = min(int(input("Podaj szerokość planszy: ")), 40)
+    height = min(int(input("Podaj wysokość planszy: ")), 50)
+    width = min(int(input("Podaj szerokość planszy: ")), 50)
 
     predators_num = min(int(input("Podaj liczbę drapieżników: ")), 500)
     preys_num = min(int(input("Podaj liczbę ofiar: ")), 600)
@@ -61,6 +61,7 @@ if __name__ == "__main__":
             print("Populacja = ", board.get_population())
             print("Żywe drapieżniki = ", board.get_predators())
             print("Żywe ofiary = ", board.get_preys())
+            print("Żywe bobry = ", board.get_beavers())
             time.sleep(0.1)
         else:
             print(f"Przyczyna zakończenia symulacji: {end}")

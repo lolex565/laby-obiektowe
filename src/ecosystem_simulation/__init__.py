@@ -43,6 +43,7 @@ class Board:
     __population = 0          # liczba żywych obiektów
     __predators = 0           # liczba drapieżników
     __preys = 0               # liczba ofiar
+    __beavers = 0             # liczba bobrów
     __grid = []               # siatka planszy
     __objects = set()         # zbiór wszystkich obiektów
     __round = 0               # tura
@@ -73,7 +74,7 @@ class Board:
         self.__size = size
         self.__grid = [[None for _ in range(self.__size.get_size()[0])] for _ in range(self.__size.get_size()[1])]
 
-        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s', filename='logs/simulation_%s.log' % time.strftime("%Y-%m-%d_%H", time.localtime()), filemode='a')
+        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s', filename='logs/simulation_%s.log' % time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime()), filemode='a')
 
     def __str__(self) -> str:
         """Zwraca planszę w postaci stringa"""
@@ -110,6 +111,10 @@ class Board:
     def get_preys(self) -> int:
         """Zwraca liczbę ofiar"""
         return self.__preys
+
+    def get_beavers(self) -> int:
+        """Zwraca liczbę bobrów"""
+        return self.__beavers
     
     def __set_grid(self) -> None:
         """Ustawia planszę"""
@@ -173,6 +178,8 @@ class Board:
             self.__predators += 1
         if issubclass(animal.__class__, Prey):
             self.__preys += 1
+        if issubclass(animal.__class__, Beaver):
+            self.__beavers += 1
         self.__population += 1
         self.__total_object_count += 1
 
@@ -236,6 +243,8 @@ class Board:
             self.__predators += 1
         if issubclass(baby.__class__, Prey):
             self.__preys += 1
+        if issubclass(baby.__class__, Beaver):
+            self.__beavers += 1
 
     def remove(self, obj) -> None:
         """Usuwa obiekt z planszy
@@ -255,6 +264,7 @@ class Board:
                 self.__population -= 1
         if isinstance(obj, Beaver):
             self.__population -= 1
+            self.__beavers -= 1
         self.__total_object_count -= 1
         self.__population = max(self.__population, 0)
         del obj
