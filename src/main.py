@@ -15,6 +15,7 @@ if __name__ == "__main__":
     beavers_num = min(int(input("Podaj liczbę bobrów: ")), 400)
 
     items_num = min(int(input("Podaj liczbę obiektów nieożywionych: ")), 1000)
+    time.sleep(min((float(input("podaj minimalny czas między turami w ms: ")) / 1000), 0.01))
 
     print("Przygotowywanie symulacji...")
 
@@ -47,7 +48,7 @@ if __name__ == "__main__":
     # komenda czyszcząca ekran
     # cls dla Windows, clear dla Linux/Unix
     clear_screen_cmd = "cls" if platform.system() == "Windows" else "clear"
-    
+
     print("Rozpoczynanie symulacji...")
     os.system(clear_screen_cmd)
     print(board)
@@ -62,7 +63,6 @@ if __name__ == "__main__":
             print("Żywe drapieżniki = ", board.get_predators())
             print("Żywe ofiary = ", board.get_preys())
             print("Żywe bobry = ", board.get_beavers())
-            time.sleep(0.1)
         else:
             print(f"Przyczyna zakończenia symulacji: {end}")
     except KeyboardInterrupt:

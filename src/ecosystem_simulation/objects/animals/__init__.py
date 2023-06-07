@@ -140,9 +140,9 @@ class Animal(Object):
                 if self.get_hit_points() > 0 and partner.get_hit_points() > 0:
                     if self.get_age() >= 5 and partner.get_age() >= 5:
                         if type(self).__name__ == "Predator":
-                            if self.get_gender() == GENDER_MALE and  not partner.has_reproduced():
+                            if self.get_gender() == GENDER_MALE and not partner.has_reproduced():
                                 return True
-                            elif  not self.has_reproduced():
+                            elif not self.has_reproduced():
                                 return True
                         elif not self.has_reproduced():
                             return True
