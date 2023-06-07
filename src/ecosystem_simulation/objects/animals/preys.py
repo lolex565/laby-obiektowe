@@ -53,7 +53,7 @@ class Prey(Animal):
         
         :param predator: drapieżnik
         """
-        predator.set_damage(int(self.get_strenght() + self.get_weight() + self.get_fear()))
+        predator.set_damage(int(self.get_strenght()))
 
     def make_sound(self) -> int:
         """Wydanie dźwięku"""

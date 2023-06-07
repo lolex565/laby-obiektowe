@@ -140,15 +140,8 @@ class Board:
 
     def __generate_random_position(self) -> tuple:
         """Generuje losowe współrzędne"""
-        retry = 0
-        while True and retry < 10:
-            x, y = randint(0, self.__size.get_size()[0] -1), randint(0, self.__size.get_size()[1] - 1)
-            if self.get_grid()[y][x] is None:
-                return (x, y)
-            retry += 1
-        else:
-            # nie udało się wygenerować losowych współrzędnych
-            return (-1, -1)
+        x, y = randint(0, self.__size.get_size()[0] -1), randint(0, self.__size.get_size()[1] - 1)
+        return (x, y)
 
     def add_random_animal(self, spieces=None) -> None:
         """Dodaje losowe zwierzę"""
@@ -158,9 +151,6 @@ class Board:
             species = spieces
         
         x, y = self.__generate_random_position()
-        if x == -1 or y == -1:
-            # nie udało się wygenerować losowych współrzędnych
-            return
 
         animal = eval(species)(
             x=x,
@@ -243,7 +233,6 @@ class Board:
         )
 
         self.__objects.add(baby)
-        self.__grid[baby.get_position()[1]][baby.get_position()[0]] = baby
         self.__population += 1
         self.__total_object_count += 1
         if issubclass(baby.__class__, Predator):
@@ -281,21 +270,8 @@ class Board:
         :param view_range: zasięg widzenia
         :return: lista obiektów w zasięgu widzenia
         """
-        objests_nearby = []
-        self.__set_grid()
-        for i in range(x - view_range, x + view_range + 1):
-            for j in range(y - view_range, y + view_range + 1):
-                    try:
-                        if i == x and j == y:
-                            continue
-                        if self.__grid[j][i] is not None:
-                            objests_nearby.append(self.__grid[j][i])
-                    except IndexError:
-                        # indeks może wykorczyć poza zakres co spowoduje
-                        # wyrzucenie wyjątku. Jeśli wyjątek wystąpi,
-                        # wyłapujemy go i ignorujemy
-                        pass
-        return objests_nearby
+        objects_nearby = list(filter(lambda o: self.__calculate_range(x, y, *o.get_position()) <= view_range, self.__objects))
+        return objects_nearby
     
     def __calculate_range(self, x1: int, y1: int, x2: int, y2: int) -> int:
         """Oblicza dystans między dwoma punktami
@@ -361,7 +337,7 @@ class Board:
                     continue
 
                 # rozglądamy się w poszukiwaniu obiektów w zasięgu widzenia
-                objects_nearby = sorted(self.__scan_area_nearby(*obj.get_position(), obj.get_view_range()), key=lambda o: self.__calculate_range(*obj.get_position(), *o.get_position()))
+                objects_nearby = self.__scan_area_nearby(*obj.get_position(), obj.get_view_range())
 
                 # sprawdzamy, jakie obiekty są w zasięgu widzenia
                 for object_nearby in objects_nearby:
@@ -371,17 +347,11 @@ class Board:
                     if objects_nearby is obj:
                         # jeśli obiekt jest sam ze sobą, pomijamy go
                         continue
-                    if obj.__class__ == object_nearby.__class__:
-                        # jeśli obiekt jest tego samego typu, próbujemy się rozmnożyć
-                        if obj.can_reproduce_with(object_nearby):
-                            if obj.get_position() == object_nearby.get_position():
-                                # jeśli zwierzę jest w tym samym miejscu, rozmnażamy się
-                                self.populate(obj)
-                                logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has reproduced with {type(object_nearby).__name__}{object_nearby.get_position()} ]')
-                            else:
-                                # poruszamy się w kierunku partnera
-                                x, y = self.__move_towards_object(obj, object_nearby)
-                            break
+                    # jeśli obiekt jest tego samego typu, próbujemy się rozmnożyć
+                    if obj.can_reproduce_with(object_nearby):
+                        self.populate(obj)
+                        logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has reproduced with {type(object_nearby).__name__}{object_nearby.get_position()} ]')
+                        break
                     elif issubclass(obj.__class__, Prey) and issubclass(object_nearby.__class__, Predator):
                         # jeśli obiekt jest ofiarą, a obiekt w zasięgu widzenia jest drapieżnikiem, uciekamy
                         if object_nearby.get_hit_points() <= 0:
@@ -399,7 +369,7 @@ class Board:
                             x, y = self.__correct_position(x, y)
                             logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} runs away from {type(object_nearby).__name__}{object_nearby.get_position()} ]')
                         break
-                    elif issubclass(obj.__class__, Predator) and issubclass(object_nearby.__class__, Prey):
+                    elif issubclass(obj.__class__, Predator) and issubclass(object_nearby.__class__, Prey) and obj.get_satiety() < 50:
                         # jeśli obiekt jest drapieżnikiem, a obiekt w zasięgu widzenia jest ofiarą, atakujemy
                         if obj.get_position() == object_nearby.get_position():
                             if object_nearby.get_hit_points() <= 0:
@@ -423,7 +393,7 @@ class Board:
                             x, y = self.__move_towards_object(obj, object_nearby)
                             logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} hunts {type(object_nearby).__name__}{object_nearby.get_position()} ]')
                         break
-                    elif isinstance(obj, Beaver) and isinstance(object_nearby, Tree):
+                    elif isinstance(obj, Beaver) and isinstance(object_nearby, Tree) and obj.get_satiety() < 50:
                         # jeśli obiekt jest bobrem, a obiekt w zasięgu widzenia jest drzewem, jemy je
                         if obj.get_position() == object_nearby.get_position():
                             obj.eat(object_nearby)
@@ -433,7 +403,7 @@ class Board:
                             # poruszamy się w kierunku drzewa
                             x, y = self.__move_towards_object(obj, object_nearby)
                         break
-                    elif issubclass(obj.__class__, Prey) and isinstance(object_nearby, Plant):
+                    elif issubclass(obj.__class__, Prey) and isinstance(object_nearby, Plant) and obj.get_satiety() < 70:
                         # jeśli obiekt jest ofiarą, a obiekt w zasięgu widzenia jest rośliną, jemy ją
                         if obj.get_position() == object_nearby.get_position():
                             obj.eat(object_nearby)
@@ -467,8 +437,8 @@ class Board:
                 obj.set_age(obj.get_age() + 1)
                 obj.move(x, y)
         
-        # jeśli liczba obiektów nieożywionych jest mniejsza niż 15% powierzchni mapy, dodajemy losowe obiekty
-        if self.__total_object_count - self.__population < 15 * self.get_area() // 100:
+        # jeśli liczba obiektów nieożywionych jest mniejsza niż 70% powierzchni mapy, dodajemy losowe obiekty
+        if self.__total_object_count - self.__population < 70 * self.get_area() // 100:
             self.add_random_item()
 
         # ustawiamy siatkę

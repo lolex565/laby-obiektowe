@@ -93,7 +93,7 @@ class Animal(Object):
         :param y: współrzędna y
         """
 
-        energy_lost = int((abs(self.get_position()[0] - x) + abs(self.get_position()[1] - y)) % 10)
+        energy_lost = int((abs(self.get_position()[0] - x) + abs(self.get_position()[1] - y))) % 2
         if self.__satiety == 0 or self.__thirst == 0:
             self.__hit_points -= energy_lost
             self.__hit_points = int(max(self.__hit_points, 0))
@@ -127,9 +127,8 @@ class Animal(Object):
         """
         if type(self).__name__ == type(partner).__name__:
             if self.get_gender() != self.get_gender():
-                if self.get_age() >= 5 and partner.get_age() >= 5:
-                    if self.get_hit_points() >= 0 and partner.get_hit_points() >= 0:
-                        return True
+                if self.get_hit_points() >= 0 and partner.get_hit_points() >= 0:
+                    return True
         return False
 
     def get_durability(self) -> int:
