@@ -149,6 +149,119 @@ class AnimalTester(unittest.TestCase):
 
         self.assertTrue(hp_after_attack < hp_before_attack, "Drapieżnik powinien otrzymać obrażenia")
 
+    def test_beaver_eats_tree(self):
+        beaver = Beaver(
+            x=0,
+            y=0,
+            weight=uniform(0.1, 20),
+            speed=randint(1, 5),
+            age=0,
+            thirst=100,
+            satiety=0,
+            hit_points=100,
+            gender=choice((GENDER_MALE, GENDER_FEMALE)),
+            view_range=randint(1, 20),
+            strenght=randint(1, 50),
+        )
+
+        tree = Tree(0, 0, random.uniform(0, 10), random.uniform(0, 10), 10)
+
+        beaver.eat(tree)
+
+        self.assertTrue(beaver.get_satiety() > 0, "Zjedzenie drzewa powinno zwiększyć sytość bobra")
+
+    def test_prey_eats_plant(self):
+        prey = Prey(
+            x=0,
+            y=0,
+            weight=uniform(0.1, 20),
+            speed=randint(1, 5),
+            age=0,
+            thirst=100,
+            satiety=0,
+            hit_points=100,
+            gender=choice((GENDER_MALE, GENDER_FEMALE)),
+            view_range=randint(1, 20),
+            strenght=randint(1, 50),
+            fear=randint(1, 10)
+        )
+
+        plant = Plant(0, 0, random.uniform(0, 10), random.uniform(0, 10), 10)
+
+        prey.eat(plant)
+
+        self.assertTrue(prey.get_satiety() > 0, "Zjedzenie rośliny powinno zwiększyć sytość ofiary")
+
+    def test_wolf_gives_damage_to_deer(self):
+        wolf = Wolf(
+            x=0,
+            y=0,
+            weight=uniform(0.1, 20),
+            speed=randint(1, 5),
+            age=0,
+            thirst=100,
+            satiety=100,
+            hit_points=100,
+            gender=choice((GENDER_MALE, GENDER_FEMALE)),
+            view_range=randint(1, 20),
+            strenght=randint(1, 50),
+            anger=randint(1, 10),
+        )
+
+        deer = Deer(
+            x=0,
+            y=0,
+            weight=uniform(0.1, 20),
+            speed=randint(1, 5),
+            age=0,
+            thirst=100,
+            satiety=100,
+            hit_points=100,
+            gender=choice((GENDER_MALE, GENDER_FEMALE)),
+            view_range=randint(1, 20),
+            strenght=randint(1, 50),
+            fear=randint(1, 10),
+        )
+
+        wolf.attack(deer)
+
+        self.assertTrue(deer.get_antlers_durability() < 100, "Poroże jelenia powinno zostać uszkodzone")
+
+    def test_deer_gives_damage_to_eagle(self):
+        eagle = Eagle(
+            x=0,
+            y=0,
+            weight=uniform(0.1, 20),
+            speed=randint(1, 5),
+            age=0,
+            thirst=100,
+            satiety=100,
+            hit_points=100,
+            gender=choice((GENDER_MALE, GENDER_FEMALE)),
+            view_range=randint(1, 20),
+            strenght=randint(1, 50),
+            anger=randint(1, 10),
+        )
+
+        deer = Deer(
+            x=0,
+            y=0,
+            weight=uniform(0.1, 20),
+            speed=randint(1, 5),
+            age=0,
+            thirst=100,
+            satiety=100,
+            hit_points=100,
+            gender=choice((GENDER_MALE, GENDER_FEMALE)),
+            view_range=randint(1, 20),
+            strenght=randint(1, 50),
+            fear=randint(1, 10),
+        )
+
+        deer.defend(eagle)
+
+        self.assertTrue(eagle.get_beak_durability() < 100, "Dziób orła powinien zostać uszkodzony")
+
 
 if __name__ == '__main__':
     unittest.main()
