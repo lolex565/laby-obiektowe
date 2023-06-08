@@ -59,7 +59,7 @@ class Animal(Object):
             return False
         if self.get_thirst() < 60:
             return False
-        if self.has_reproduced() > 3:
+        if self.has_reproduced() > 6:
             return False
         return True
     

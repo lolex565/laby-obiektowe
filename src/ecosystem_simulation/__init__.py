@@ -46,6 +46,9 @@ class Board:
     __predators = 0           # liczba drapieżników
     __preys = 0               # liczba ofiar
     __beavers = 0             # liczba bobrów
+    __plants = 0              # liczba roślin
+    __trees = 0               # liczba drzew
+    __waters = 0              # liczba wód
     __grid = []               # siatka planszy
     __objects = set()         # zbiór wszystkich obiektów
     __round = 0               # tura
@@ -123,6 +126,18 @@ class Board:
     def get_beavers(self) -> int:
         """Zwraca liczbę bobrów"""
         return self.__beavers
+
+    def get_plants(self) -> int:
+        """Zwraca liczbę roślin"""
+        return self.__plants
+
+    def get_trees(self) -> int:
+        """Zwraca liczbę drzew"""
+        return self.__trees
+
+    def get_waters(self) -> int:
+        """Zwraca liczbę wód"""
+        return self.__waters
     
     def __set_grid(self) -> None:
         """Ustawia planszę"""
@@ -149,7 +164,16 @@ class Board:
 
     def append_pop_data(self) -> None:
         """Dodaje dane o populacji w czasie"""
-        self.__pop_data.append([self.get_round(), self.get_population(), self.get_predators(), self.get_preys(), self.get_beavers()])
+        row =[]
+        row.append(self.get_round())
+        row.append(self.get_population())
+        row.append(self.get_predators())
+        row.append(self.get_preys())
+        row.append(self.get_beavers())
+        row.append(self.get_plants())
+        row.append(self.get_trees())
+        row.append(self.get_waters())
+        self.__pop_data.append(row)
     
     def add_random_object(self) -> None:
         """Dodaje losowy obiekt"""
@@ -214,6 +238,12 @@ class Board:
             durability=randint(1, 50),
         )
 
+        if issubclass(item.__class__, Plant):
+            self.__plants += 1
+        if issubclass(item.__class__, Tree):
+            self.__trees += 1
+        if issubclass(item.__class__, Water):
+            self.__waters += 1
         self.__objects.add(item)
         self.__total_object_count += 1
 
@@ -279,8 +309,18 @@ class Board:
                 self.__preys = max(self.__preys, 0)
                 self.__population -= 1
         if isinstance(obj, Beaver):
-            self.__population -= 1
             self.__beavers -= 1
+            self.__beavers = max(self.__beavers, 0)
+            self.__population -= 1
+        if isinstance(obj, Plant):
+            self.__plants -= 1
+            self.__plants = max(self.__plants, 0)
+        if isinstance(obj, Tree):
+            self.__trees -= 1
+            self.__trees = max(self.__trees, 0)
+        if isinstance(obj, Water):
+            self.__waters -= 1
+            self.__waters = max(self.__waters, 0)
         self.__total_object_count -= 1
         self.__population = max(self.__population, 0)
         del obj
@@ -347,19 +387,29 @@ class Board:
 
             if issubclass(obj.__class__, Animal):
                 # jeśli obiekt jest zwierzęciem, aktualizujemy jego stan
-
                 if issubclass(obj.__class__, Predator):
-                    if obj.get_age() >= randint(50, 100):
+                    if obj.get_age() >= randint(50, 100) and randint(0, 10000) == 1:
                         self.remove(obj)
                         logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has died of old age: {obj.get_age()} ]')
                         continue
                 elif issubclass(obj.__class__, Prey):
-                    if obj.get_age() >= randint(40, 100):
+                    if randint(0, 1000) == 1:
                         self.remove(obj)
-                        logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has died of old age: {obj.get_age()} ]')
+                        logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has died of fatal indigestion ]')
                         continue
+                    if self.get_preys() >= 2*self.get_predators():
+                        if obj.get_age() >= randint(30, 100) and randint(0, 10) == 1:
+                            self.remove(obj)
+                            logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has died of old age: {obj.get_age()} ]')
+                            continue
+                    else:
+                        if obj.get_age() >= randint(30, 100) and randint(0, 100) == 1:
+                            self.remove(obj)
+                            logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has died of old age: {obj.get_age()} ]')
+                            continue
+
                 elif issubclass(obj.__class__, Beaver):
-                    if obj.get_age() >= randint(15, 20):
+                    if obj.get_age() >= randint(15, 20) and randint(0, 1000) == 1:
                         logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has died of old age: {obj.get_age()} ]')
                         continue
 
@@ -465,12 +515,6 @@ class Board:
                         break
                     # jeśli obiekt jest tego samego typu oraz maksymalna populacja na to pozwala, próbujemy się rozmnożyć
                     elif obj.can_reproduce_with(object_nearby):
-                        if isinstance(obj, Predator) and self.get_predators() >= 0.6 * self.get_population():
-                            break
-                        if isinstance(obj, Prey) and self.get_preys() >= 0.6 * self.get_population():
-                            break
-                        if isinstance(obj, Beaver) and self.get_beavers() >= 0.6 * self.get_population():
-                            break
                         if self.get_population() >= self.get_max_pop():
                             break
                         if obj.get_position() == object_nearby.get_position():
