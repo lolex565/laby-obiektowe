@@ -81,7 +81,7 @@ class Board:
         self.__size = size
         self.__grid = [[None for _ in range(self.__size.get_size()[0])] for _ in range(self.__size.get_size()[1])]
         self.__max_pop = max_pop
-        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s', filename='logs/simulation_%s.log' % time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime()), filemode='a')
+        logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s', filename='logs/simulation_%s.log' % time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime()), filemode='a')
 
     def __str__(self) -> str:
         """Zwraca planszę w postaci stringa"""
