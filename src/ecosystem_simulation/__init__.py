@@ -50,7 +50,8 @@ class Board:
     __objects = set()         # zbiór wszystkich obiektów
     __round = 0               # tura
     __size = None             # rozmiar planszy
-    __max_pop = 1000             # maksymalna liczba zwierząt na planszy
+    __max_pop = 1000          # maksymalna liczba zwierząt na planszy
+    __pop_data = []           # dane o populacji w czasie
 
     # możliwe zwierzęta
     __possible_animals = {
@@ -78,6 +79,7 @@ class Board:
         self.__grid = [[None for _ in range(self.__size.get_size()[0])] for _ in range(self.__size.get_size()[1])]
         self.__max_pop = max_pop
         logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s', filename='logs/simulation_%s.log' % time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime()), filemode='a')
+        self.append_pop_data()
 
     def __str__(self) -> str:
         """Zwraca planszę w postaci stringa"""
@@ -141,6 +143,14 @@ class Board:
     def get_round(self) -> int:
         """Zwraca numer rundy"""
         return self.__round
+
+    def get_pop_data(self) -> list:
+        """Zwraca dane o populacji w czasie"""
+        return self.__pop_data
+
+    def append_pop_data(self) -> None:
+        """Dodaje dane o populacji w czasie"""
+        self.__pop_data.append([self.get_round(), self.get_population(), self.get_predators(), self.get_preys(), self.get_beavers()])
     
     def add_random_object(self) -> None:
         """Dodaje losowy obiekt"""
@@ -329,6 +339,7 @@ class Board:
         self.__round += 1  # zwiększamy licznik rund
         self.__set_grid()  # ustawiamy siatkę
 
+
         # aktualizujemy stan obiektów
         for obj in list(self.__objects):
             if obj not in self.__objects:
@@ -339,12 +350,12 @@ class Board:
                 # jeśli obiekt jest zwierzęciem, aktualizujemy jego stan
 
                 if issubclass(obj.__class__, Predator):
-                    if obj.get_age() >= randint(80, 100):
+                    if obj.get_age() >= randint(50, 100):
                         self.remove(obj)
                         logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has died of old age: {obj.get_age()} ]')
                         continue
                 elif issubclass(obj.__class__, Prey):
-                    if obj.get_age() >= randint(30, 50):
+                    if obj.get_age() >= randint(40, 100):
                         self.remove(obj)
                         logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has died of old age: {obj.get_age()} ]')
                         continue
@@ -453,8 +464,16 @@ class Board:
                             # poruszamy się w kierunku wody
                             x, y = self.__move_towards_object(obj, object_nearby)
                         break
-                    # jeśli obiekt jest tego samego typu, próbujemy się rozmnożyć
-                    elif obj.can_reproduce_with(object_nearby) and self.get_population() <= self.get_max_pop():
+                    # jeśli obiekt jest tego samego typu oraz maksymalna populacja na to pozwala, próbujemy się rozmnożyć
+                    elif obj.can_reproduce_with(object_nearby):
+                        if isinstance(obj, Predator) and self.get_predators() >= 0.6 * self.get_population():
+                            break
+                        if isinstance(obj, Prey) and self.get_preys() >= 0.6 * self.get_population():
+                            break
+                        if isinstance(obj, Beaver) and self.get_beavers() >= 0.6 * self.get_population():
+                            break
+                        if self.get_population() >= self.get_max_pop():
+                            break
                         if obj.get_position() == object_nearby.get_position():
                             if obj.can_have_child() and object_nearby.can_have_child():
                                 if obj.can_have_triplets() or object_nearby.can_have_triplets():
@@ -500,6 +519,9 @@ class Board:
         - liczba drapieżników jest równa 0
         - cała populacja jest równa 0
         """
+
+        self.append_pop_data()
+
         if self.__population <= 0:
             logging.info(f'[ Round {self.get_round()}: Simulation has ended - All animals have died ]')
             return "Wszystkie zwierzęta umarły"

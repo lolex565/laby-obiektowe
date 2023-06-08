@@ -4,6 +4,7 @@ from ecosystem_simulation import Board, BoardSize
 from ecosystem_simulation.objects.animals import *
 from ecosystem_simulation.objects.animals.preys import *
 from ecosystem_simulation.objects.animals.predators import *
+from ecosystem_simulation.utils import *
 
 
 if __name__ == "__main__":
@@ -66,5 +67,6 @@ if __name__ == "__main__":
             print("Żywe bobry = ", board.get_beavers())
         else:
             print(f"Przyczyna zakończenia symulacji: {end}")
+            create_csv_file(f'wyniki_{time.strftime("%Y-%m-%d_%H-%M-%S")}.csv', board.get_pop_data())
     except KeyboardInterrupt:
         print("Przerwano symulację")

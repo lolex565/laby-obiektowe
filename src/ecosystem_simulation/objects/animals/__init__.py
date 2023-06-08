@@ -55,9 +55,9 @@ class Animal(Object):
         """Sprawdza, czy zwierzę może mieć potomka"""
         if self.get_age() < 5:
             return False
-        if self.get_satiety() < 40:
+        if self.get_satiety() < 60:
             return False
-        if self.get_thirst() < 40:
+        if self.get_thirst() < 60:
             return False
         if self.has_reproduced() > 3:
             return False
