@@ -67,6 +67,14 @@ if __name__ == "__main__":
             print("Żywe bobry = ", board.get_beavers())
         else:
             print(f"Przyczyna zakończenia symulacji: {end}")
-            create_csv_file(f'wyniki_{time.strftime("%Y-%m-%d_%H-%M-%S")}.csv', board.get_pop_data())
     except KeyboardInterrupt:
         print("Przerwano symulację")
+
+    choice_csv = input("Czy chcesz zapisać wyniki do pliku csv? [t/n]: ")
+    if choice_csv.lower() == "t":
+        time_of_creation = time.strftime("%Y-%m-%d_%H-%M-%S")
+        create_csv_file(f'wyniki_{time_of_creation}.csv', board.get_pop_data())
+        choice_graph = input("Czy chcesz utworzyć wykres z wyników? [t/n]: ")
+        if choice_graph.lower() == "t":
+            create_graph(f'wyniki_{time_of_creation}.csv')
+

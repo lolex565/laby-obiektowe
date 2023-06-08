@@ -10,3 +10,5 @@ logs/*
 *.pyc
 */__pycache__/*
 csv/*
+graphs/*
+```
