@@ -327,8 +327,25 @@ class Board:
             if obj not in self.__objects:
                 # jeśli obiekt został usunięty, pomijamy go
                 continue
+
             if issubclass(obj.__class__, Animal):
                 # jeśli obiekt jest zwierzęciem, aktualizujemy jego stan
+
+                if issubclass(obj.__class__, Predator):
+                    if obj.get_age() >= randint(80, 100):
+                        self.remove(obj)
+                        logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has died of old age: {obj.get_age()} ]')
+                        continue
+                elif issubclass(obj.__class__, Prey):
+                    if obj.get_age() >= randint(30, 60):
+                        self.remove(obj)
+                        logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has died of old age: {obj.get_age()} ]')
+                        continue
+                elif issubclass(obj.__class__, Beaver):
+                    if obj.get_age() >= randint(15, 20):
+                        logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has died of old age: {obj.get_age()} ]')
+                        continue
+
                 x, y = obj.get_position()
                 if obj.get_hit_points() <= 0:
                     # jeśli zwierzę nie ma już punktów życia, usuwamy go
@@ -445,7 +462,7 @@ class Board:
                 else:
                     # jeśli nie znaleziono żadnego obiektu w zasięgu widzenia, losowo poruszamy się po mapie
                     x, y = randint(1, self.__size.get_size()[0] - 1), randint(1, self.__size.get_size()[1] - 1)
-                    x, y = move_towards_point(*obj.get_position(), x, y, obj.get_speed())
+                    x, y = move_towards_point(*obj.get_position(), x, y, int(obj.get_speed()))
                     x, y = self.__correct_position(x, y)
 
                 # zwiększamy wiek zwierzęcia i poruszamy się
