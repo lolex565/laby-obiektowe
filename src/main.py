@@ -18,6 +18,7 @@ if __name__ == "__main__":
 
     items_num = min(int(input("Podaj liczbę obiektów nieożywionych: ")), 1000)
     time.sleep(min((float(input("podaj minimalny czas między turami w ms: ")) / 1000), 0.01))
+    max_turns = min(int(input("Podaj maksymalną liczbę tur (domyślnie maksymalnie 10 tysięcy tur): ")), 10000)
 
     print("Przygotowywanie symulacji...")
 
@@ -55,7 +56,7 @@ if __name__ == "__main__":
     os.system(clear_screen_cmd)
     print(board)
     try:
-        while not (end := board.check_end_conditions()):
+        while not (end := board.check_end_conditions()) and board.get_round() < max_turns:
             board.update()
             os.system(clear_screen_cmd)
             print(board)

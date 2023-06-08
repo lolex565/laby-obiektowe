@@ -94,6 +94,7 @@ def create_single_graph(folder_name: str, file_name: str, title: str, data: [], 
     plt.title(title)
     plt.legend()
     plt.grid(True)
+    plt.rcParams['savefig.dpi'] = 600
     plt.savefig(f'graphs/{folder_name}/{file_name}.png')
     plt.close()
 
