@@ -13,6 +13,7 @@ if __name__ == "__main__":
     predators_num = min(int(input("Podaj liczbę drapieżników: ")), 500)
     preys_num = min(int(input("Podaj liczbę ofiar: ")), 600)
     beavers_num = min(int(input("Podaj liczbę bobrów: ")), 400)
+    max_pop = min(int(input("Podaj maksymalną liczbę zwierząt na planszy(zalecany 600 maksymalnie): ")), 3000)
 
     items_num = min(int(input("Podaj liczbę obiektów nieożywionych: ")), 1000)
     time.sleep(min((float(input("podaj minimalny czas między turami w ms: ")) / 1000), 0.01))
@@ -21,7 +22,7 @@ if __name__ == "__main__":
 
     # tworzymy planszę
     print("Tworzenie planszy...")
-    board = Board(BoardSize(width, height))
+    board = Board(BoardSize(width, height), max_pop)
 
     # dodajemy zwierzęta
 

@@ -1,6 +1,7 @@
 from random import randint, choice, uniform
 import math, logging, time
 
+from .objects import Object
 from .objects.items import *
 from .objects.animals import *
 from .objects.animals.beaver import Beaver
@@ -34,6 +35,7 @@ class BoardSize:
         :return: powierzchnia planszy
         """
         return self.__width * self.__height
+
     
 
 class Board:
@@ -48,6 +50,7 @@ class Board:
     __objects = set()         # zbiór wszystkich obiektów
     __round = 0               # tura
     __size = None             # rozmiar planszy
+    __max_pop = 1000             # maksymalna liczba zwierząt na planszy
 
     # możliwe zwierzęta
     __possible_animals = {
@@ -66,14 +69,14 @@ class Board:
         "Water": Water
     }
 
-    def __init__(self, size: BoardSize) -> None:
+    def __init__(self, size: BoardSize, max_pop: int) -> None:
         """Konstruktor klasy Board
 
         :param size: rozmiar planszy
         """
         self.__size = size
         self.__grid = [[None for _ in range(self.__size.get_size()[0])] for _ in range(self.__size.get_size()[1])]
-
+        self.__max_pop = max_pop
         logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s', filename='logs/simulation_%s.log' % time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime()), filemode='a')
 
     def __str__(self) -> str:
@@ -95,6 +98,10 @@ class Board:
     def get_area(self) -> int:
         """Zwraca powierzchnię planszy"""
         return self.__size.get_area()
+
+    def get_max_pop(self) -> int:
+        """Zwraca maksymalną liczbę zwierząt na planszy"""
+        return self.__max_pop
     
     def get_total_object_count(self) -> int:
         """Zwraca liczbę wszystkich obiektów"""
@@ -337,7 +344,7 @@ class Board:
                         logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has died of old age: {obj.get_age()} ]')
                         continue
                 elif issubclass(obj.__class__, Prey):
-                    if obj.get_age() >= randint(30, 60):
+                    if obj.get_age() >= randint(30, 50):
                         self.remove(obj)
                         logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has died of old age: {obj.get_age()} ]')
                         continue
@@ -388,7 +395,7 @@ class Board:
                             x, y = self.__correct_position(x, y)
                             logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} runs away from {type(object_nearby).__name__}{object_nearby.get_position()} ]')
                         break
-                    elif issubclass(obj.__class__, Predator) and issubclass(object_nearby.__class__, Prey):
+                    elif issubclass(obj.__class__, Predator) and issubclass(object_nearby.__class__, Prey) and obj.get_satiety() < 70:
                         # jeśli obiekt jest drapieżnikiem, a obiekt w zasięgu widzenia jest ofiarą, atakujemy
                         if obj.get_position() == object_nearby.get_position():
                             if object_nearby.get_hit_points() <= 0:
@@ -447,13 +454,22 @@ class Board:
                             x, y = self.__move_towards_object(obj, object_nearby)
                         break
                     # jeśli obiekt jest tego samego typu, próbujemy się rozmnożyć
-                    elif obj.can_reproduce_with(object_nearby):
+                    elif obj.can_reproduce_with(object_nearby) and self.get_population() <= self.get_max_pop():
                         if obj.get_position() == object_nearby.get_position():
-                            obj.reproduce()
-                            object_nearby.reproduce()
-                            self.populate(obj)
-                            logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has reproduced with {type(object_nearby).__name__}{object_nearby.get_position()} ]')
-                            x, y = move_away_from_point(*obj.get_position(), *object_nearby.get_position(), obj.get_speed())
+                            if obj.can_have_child() and object_nearby.can_have_child():
+                                if obj.can_have_triplets() or object_nearby.can_have_triplets():
+                                    self.populate(obj)
+                                    self.populate(obj)
+                                    self.populate(obj)
+                                    logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has reproduced with {type(object_nearby).__name__}{object_nearby.get_position()} and had triplets ]')
+                                elif obj.can_have_twins() or object_nearby.can_have_twins():
+                                    self.populate(obj)
+                                    self.populate(obj)
+                                    logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has reproduced with {type(object_nearby).__name__}{object_nearby.get_position()} and had twins ]')
+                                else:
+                                    self.populate(obj)
+                                    logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has reproduced with {type(object_nearby).__name__}{object_nearby.get_position()} ]')
+                            x, y = move_away_from_point(*obj.get_position(), *object_nearby.get_position(), int(obj.get_speed()))
                             x, y = self.__correct_position(x, y)
                         else:
                             # poruszamy się w kierunku partnera

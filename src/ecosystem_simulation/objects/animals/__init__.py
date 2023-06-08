@@ -1,4 +1,5 @@
 import sys
+from random import randint
 
 sys.path.append('../..')
 
@@ -49,6 +50,30 @@ class Animal(Object):
     def get_age(self) -> int:
         """Zwraca wiek zwierzęcia"""
         return self.__age
+
+    def can_have_child(self) -> bool:
+        """Sprawdza, czy zwierzę może mieć potomka"""
+        if self.get_age() < 5:
+            return False
+        if self.get_satiety() < 40:
+            return False
+        if self.get_thirst() < 40:
+            return False
+        if self.has_reproduced() > 3:
+            return False
+        return True
+    
+    def can_have_twins(self) -> bool:
+        """Sprawdza, czy zwierzę może mieć bliźniaki"""
+        if self.can_have_child():
+            if self.get_satiety() > 80 and self.get_thirst() > 80:
+                return True
+        return False
+    
+    def can_have_triplets(self) -> bool:
+        if self.can_have_twins() and randint(0, 300) == 1:
+            return True
+        return False
     
     def has_reproduced(self) -> int:
         """Sprawdza, czy zwierzę się już rozmnożyło"""

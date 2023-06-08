@@ -66,6 +66,16 @@ class Predator(Animal):
         self.set_satiety(max(satiety, 100))
         self.__anger -= int(prey.get_weight()) % 100
 
+    def can_have_child(self) -> bool:
+        """Sprawdza, czy zwierzę może mieć potomka"""
+        if self.get_age() < 5:
+            return False
+        if self.get_satiety() < 30:
+            return False
+        if self.get_thirst() < 30:
+            return False
+        return True
+
 
 class Wolf(Predator):
     """Klasa reprezentująca wilka"""
