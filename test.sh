@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 python -m unittest tests/animal_tests.py
 
