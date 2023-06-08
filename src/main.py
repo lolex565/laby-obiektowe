@@ -1,4 +1,4 @@
-import pickle, platform, os, time
+import platform, os, time
 
 from ecosystem_simulation import Board, BoardSize
 from ecosystem_simulation.objects.animals import *
