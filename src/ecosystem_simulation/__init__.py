@@ -54,6 +54,7 @@ class Board:
     __round = 0               # tura
     __size = None             # rozmiar planszy
     __max_pop = 1000          # maksymalna liczba zwierząt na planszy
+    __max_turns = 10000        # maksymalna liczba tur
     __pop_data = []           # dane o populacji w czasie
 
     # możliwe zwierzęta
@@ -73,14 +74,17 @@ class Board:
         "Water": Water
     }
 
-    def __init__(self, size: BoardSize, max_pop: int) -> None:
+    def __init__(self, size: BoardSize, max_pop: int, max_turns: int) -> None:
         """Konstruktor klasy Board
 
         :param size: rozmiar planszy
+        :param max_pop: maksymalna liczba zwierząt na planszy
+        :param max_turns: maksymalna liczba tur
         """
         self.__size = size
         self.__grid = [[None for _ in range(self.__size.get_size()[0])] for _ in range(self.__size.get_size()[1])]
         self.__max_pop = max_pop
+        self.__max_turns = max_turns
         logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s', filename='logs/simulation_%s.log' % time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime()), filemode='a')
 
     def __str__(self) -> str:
@@ -413,7 +417,7 @@ class Board:
                             continue
 
                 elif issubclass(obj.__class__, Beaver):
-                    if obj.get_age() >= randint(15, 20) and randint(0, 1000) == 1:
+                    if obj.get_age() >= randint(15, 20) and randint(0, 100) == 1:
                         logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has died of old age: {obj.get_age()} ]')
                         continue
 
@@ -534,6 +538,15 @@ class Board:
                             else:
                                 self.populate(obj)
                                 logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has reproduced with {type(object_nearby).__name__}{object_nearby.get_position()} ]')
+                            if randint(0, 100) == 1:
+                                if obj.get_gender() == GENDER_FEMALE:
+                                    self.remove(obj)
+                                    logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has died giving birth ]')
+                                    continue
+                                else:
+                                    self.remove(object_nearby)
+                                    logging.info(f'[ Round {self.get_round()}: {type(object_nearby).__name__}{object_nearby.get_position()} has died giving birth ]')
+                                    continue
                             x, y = move_away_from_point(*obj.get_position(), *object_nearby.get_position(), int(obj.get_speed()))
                             x, y = self.__correct_position(x, y)
                         else:
@@ -564,6 +577,7 @@ class Board:
         - liczba ofiar jest równa 0
         - liczba drapieżników jest równa 0
         - cała populacja jest równa 0
+        - liczba rund jest równa maksymalnej liczbie rund
         """
 
         self.append_pop_data()
@@ -577,4 +591,7 @@ class Board:
         if self.__preys <= 0:
             logging.info(f'[ Round {self.get_round()}: Simulation has ended - All preys have died ]')
             return "Wszystkie ofiary umarły"
+        if self.get_round() >= self.__max_turns:
+            logging.info(f'[ Round {self.get_round()}: Simulation has ended - Maximum number of rounds reached ]')
+            return "Osiągnięto maksymalną liczbę rund"
         return False

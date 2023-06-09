@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
     # tworzymy planszę
     print("Tworzenie planszy...")
-    board = Board(BoardSize(width, height), max_pop)
+    board = Board(BoardSize(width, height), max_pop, max_turns)
 
     # dodajemy zwierzęta
 
@@ -56,7 +56,7 @@ if __name__ == "__main__":
     os.system(clear_screen_cmd)
     print(board)
     try:
-        while not (end := board.check_end_conditions()) and board.get_round() < max_turns:
+        while not (end := board.check_end_conditions()):
             board.update()
             os.system(clear_screen_cmd)
             print(board)
@@ -75,7 +75,9 @@ if __name__ == "__main__":
     if choice_csv.lower() == "t":
         time_of_creation = time.strftime("%Y-%m-%d_%H-%M-%S")
         create_csv_file(f'wyniki_{time_of_creation}.csv', board.get_pop_data())
+        print(f'Plik csv został zapisany jako csv/wyniki_{time_of_creation}.csv')
         choice_graph = input("Czy chcesz utworzyć wykresy z wyników? [t/n]: ")
         if choice_graph.lower() == "t":
             create_graphs(f'wyniki_{time_of_creation}')
+            print(f'Wykresy zostały zapisane w folderze graphs/wyniki_{time_of_creation}')
 

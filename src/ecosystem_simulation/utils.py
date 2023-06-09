@@ -87,6 +87,8 @@ def create_csv_file(file_name: str, data: list) -> str:
 
 def create_single_graph(folder_name: str, file_name: str, title: str, data: [], turns: []) -> None:
     colors = ['red', 'blue', 'green', 'brown', 'orange', 'purple', 'pink', 'black']
+    plt.rcParams['figure.dpi'] = 600
+    plt.rcParams['figure.figsize'] = [16, 9]
     for series in data:
         plt.plot(turns[0], series[0], label=series[1], color=colors.pop(0))
     plt.xlabel('tura')
@@ -94,8 +96,6 @@ def create_single_graph(folder_name: str, file_name: str, title: str, data: [], 
     plt.title(title)
     plt.legend()
     plt.grid(True)
-    plt.rcParams['figure.dpi'] = 600
-    plt.rcParams['figure.figsize'] = [16, 9]
     plt.savefig(f'graphs/{folder_name}/{file_name}.png')
     plt.close()
 
