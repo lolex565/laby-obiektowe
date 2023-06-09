@@ -94,9 +94,11 @@ def create_single_graph(folder_name: str, file_name: str, title: str, data: [], 
     plt.title(title)
     plt.legend()
     plt.grid(True)
-    plt.rcParams['savefig.dpi'] = 600
+    plt.rcParams['figure.dpi'] = 600
+    plt.rcParams['figure.figsize'] = [16, 9]
     plt.savefig(f'graphs/{folder_name}/{file_name}.png')
     plt.close()
+
 
 def create_graphs(file_name: str) -> None:
     """Tworzy wykres z podanego pliku csv"""

@@ -392,7 +392,7 @@ class Board:
                         self.remove(obj)
                         logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has died of old age: {obj.get_age()} ]')
                         continue
-                    if 1.2 * self.get_preys() <= self.get_predators() and randint(0, 100) == 1:
+                    if 0.8 * self.get_preys() <= self.get_predators() and randint(0, 100) == 1:
                         self.remove(obj)
                         logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has died breaking a leg while hunting ]')
                         continue
