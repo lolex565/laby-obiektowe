@@ -388,9 +388,13 @@ class Board:
             if issubclass(obj.__class__, Animal):
                 # jeśli obiekt jest zwierzęciem, aktualizujemy jego stan
                 if issubclass(obj.__class__, Predator):
-                    if obj.get_age() >= randint(50, 100) and randint(0, 10000) == 1:
+                    if obj.get_age() >= randint(40, 100) and randint(0, 1000) == 1:
                         self.remove(obj)
                         logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has died of old age: {obj.get_age()} ]')
+                        continue
+                    if 1.2 * self.get_preys() <= self.get_predators() and randint(0, 100) == 1:
+                        self.remove(obj)
+                        logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has died breaking a leg while hunting ]')
                         continue
                 elif issubclass(obj.__class__, Prey):
                     if randint(0, 1000) == 1:
@@ -518,19 +522,18 @@ class Board:
                         if self.get_population() >= self.get_max_pop():
                             break
                         if obj.get_position() == object_nearby.get_position():
-                            if obj.can_have_child() and object_nearby.can_have_child():
-                                if obj.can_have_triplets() or object_nearby.can_have_triplets():
-                                    self.populate(obj)
-                                    self.populate(obj)
-                                    self.populate(obj)
-                                    logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has reproduced with {type(object_nearby).__name__}{object_nearby.get_position()} and had triplets ]')
-                                elif obj.can_have_twins() or object_nearby.can_have_twins():
-                                    self.populate(obj)
-                                    self.populate(obj)
-                                    logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has reproduced with {type(object_nearby).__name__}{object_nearby.get_position()} and had twins ]')
-                                else:
-                                    self.populate(obj)
-                                    logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has reproduced with {type(object_nearby).__name__}{object_nearby.get_position()} ]')
+                            if obj.can_have_triplets() or object_nearby.can_have_triplets():
+                                self.populate(obj)
+                                self.populate(obj)
+                                self.populate(obj)
+                                logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has reproduced with {type(object_nearby).__name__}{object_nearby.get_position()} and had triplets ]')
+                            elif obj.can_have_twins() or object_nearby.can_have_twins():
+                                self.populate(obj)
+                                self.populate(obj)
+                                logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has reproduced with {type(object_nearby).__name__}{object_nearby.get_position()} and had twins ]')
+                            else:
+                                self.populate(obj)
+                                logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has reproduced with {type(object_nearby).__name__}{object_nearby.get_position()} ]')
                             x, y = move_away_from_point(*obj.get_position(), *object_nearby.get_position(), int(obj.get_speed()))
                             x, y = self.__correct_position(x, y)
                         else:

@@ -1,11 +1,11 @@
 import sys
 from random import randint
 
-sys.path.append('../..')
 
 from ecosystem_simulation.objects import Object
 from ecosystem_simulation.objects.items import Plant, Water
 
+sys.path.append('../..')
 
 GENDER_MALE = True      # płeć męska
 GENDER_FEMALE = False   # płeć żeńska
@@ -18,7 +18,7 @@ class Animal(Object):
 
     def __init__(self, x: int, y: int, weight: float, speed: int,
                  age: int, thirst: int, satiety: int, gender: bool, view_range: int,
-                strenght: int, hit_points: int = 100) -> None:
+                 strenght: int, hit_points: int = 100) -> None:
         """Inicjalizuje zwierzę
         
         :param x: współrzędna x
@@ -53,6 +53,8 @@ class Animal(Object):
 
     def can_have_child(self) -> bool:
         """Sprawdza, czy zwierzę może mieć potomka"""
+        if self.get_hit_points() < 30:
+            return False
         if self.get_age() < 5:
             return False
         if self.get_satiety() < 60:
@@ -65,13 +67,12 @@ class Animal(Object):
     
     def can_have_twins(self) -> bool:
         """Sprawdza, czy zwierzę może mieć bliźniaki"""
-        if self.can_have_child():
-            if self.get_satiety() > 80 and self.get_thirst() > 80:
-                return True
+        if self.can_have_child() and randint(0, 50) == 1:
+            return True
         return False
     
     def can_have_triplets(self) -> bool:
-        if self.can_have_twins() and randint(0, 300) == 1:
+        if self.can_have_twins() and randint(0, 10) == 1:
             return True
         return False
     
@@ -163,20 +164,8 @@ class Animal(Object):
         if type(self).__name__ == type(partner).__name__:
             if self.get_gender() != partner.get_gender():
                 if self.get_hit_points() > 0 and partner.get_hit_points() > 0:
-                    if self.get_age() >= 5 and partner.get_age() >= 5:
-                        # if type(self).__name__ == "Predator":
-                        #     if self.get_gender() == GENDER_MALE and not partner.has_reproduced():
-                        #         return True
-                        #     elif not self.has_reproduced():
-                        #         return True
-                        # elif not self.has_reproduced():
-                        #     return True
-                        if type(self).__name__ == "Predator":
-                            return True
-                        elif self.get_gender() == GENDER_MALE and partner.has_reproduced() <= 3:
-                            return True
-                        elif not self.has_reproduced() <= 3:
-                            return True
+                    if self.can_have_child() and partner.can_have_child():
+                        return True
 
         return False
 
