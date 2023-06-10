@@ -1,8 +1,8 @@
 # Projekt na zajęcia laboratoryjne z Programowania obiektowego
 
-## specyfika
+## Specyfika
 
-Projekt tworzony jest w języku Python bez wykorzystania zewnętrznych bibliotek.
+Projekt tworzony jest w języku [Python](https://www.python.org/) (w wersji 3.11.2) z wykorzystaniem biblioteki [Matplotlib](https://matplotlib.org/) do tworzenia wykresów populacji po zakończeniu symulacji.
 
 ## Członkowie zespołu
 
@@ -30,10 +30,16 @@ Zwierzęta będą mogły pić.
 
 ## Sposób uruchomienia
 
-Najpierw należy sklonoać repozytorium:
+Najpierw należy sklonować repozytorium:
 
 ```
 git clone https://github.com/lolex565/laby-obiektowe.git
+```
+
+A nstępnie zainstalować niezbędne biblioteki:
+
+```
+pip install -r requirements.txt
 ```
 
 Aby uruchomić program należy wpisać w terminalu będąc w katalogu projektu:
