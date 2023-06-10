@@ -14,8 +14,8 @@ class AnimalTester(unittest.TestCase):
     """Testy związanych ze zwierzętami"""
 
     def test_can_reproduce_with(self):
-        male = Animal(0, 0, 0, 0, 6, 0, 0, GENDER_MALE, 0, 0)
-        female = Animal(0, 0, 0, 0, 6, 0, 0, GENDER_FEMALE, 0, 0)
+        male = Animal(0, 0, 0, 0, 6, 100, 100, GENDER_MALE, 0, 0)
+        female = Animal(0, 0, 0, 0, 6, 100, 100, GENDER_FEMALE, 0, 0)
 
         self.assertTrue(male.can_reproduce_with(female), "Osobniki różnych płci powinny móc się rozmnażać")
 

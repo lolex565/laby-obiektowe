@@ -85,7 +85,7 @@ def create_csv_file(file_name: str, data: list) -> str:
     return file_name
 
 
-def create_single_graph(folder_name: str, file_name: str, title: str, data: [], turns: []) -> None:
+def create_single_graph(folder_name: str, file_name: str, title: str, data: list, turns: list) -> None:
     colors = ['red', 'blue', 'green', 'brown', 'orange', 'purple', 'pink', 'black']
     plt.rcParams['figure.dpi'] = 600
     plt.rcParams['figure.figsize'] = [16, 9]

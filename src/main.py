@@ -80,4 +80,3 @@ if __name__ == "__main__":
         if choice_graph.lower() == "t":
             create_graphs(f'wyniki_{time_of_creation}')
             print(f'Wykresy zostały zapisane w folderze graphs/wyniki_{time_of_creation}')
-
