@@ -1,10 +1,11 @@
 import sys
+from random import randint
 
-sys.path.append('../..')
 
 from ecosystem_simulation.objects import Object
 from ecosystem_simulation.objects.items import Plant, Water
 
+sys.path.append('../..')
 
 GENDER_MALE = True      # płeć męska
 GENDER_FEMALE = False   # płeć żeńska
@@ -13,11 +14,11 @@ GENDER_FEMALE = False   # płeć żeńska
 class Animal(Object):
     """Klasa bazowa dla wszystkich zwierząt w symulacji"""
 
-    __reproduced = False
+    __reproduced = 0  # ile razy zwierzę się rozmnożyło
 
     def __init__(self, x: int, y: int, weight: float, speed: int,
                  age: int, thirst: int, satiety: int, gender: bool, view_range: int,
-                strenght: int, hit_points: int = 100) -> None:
+                 strenght: int, hit_points: int = 100) -> None:
         """Inicjalizuje zwierzę
         
         :param x: współrzędna x
@@ -49,14 +50,39 @@ class Animal(Object):
     def get_age(self) -> int:
         """Zwraca wiek zwierzęcia"""
         return self.__age
+
+    def can_have_child(self) -> bool:
+        """Sprawdza, czy zwierzę może mieć potomka"""
+        if self.get_hit_points() < 30:
+            return False
+        if self.get_age() < 5:
+            return False
+        if self.get_satiety() < 60:
+            return False
+        if self.get_thirst() < 60:
+            return False
+        if self.has_reproduced() > 6:
+            return False
+        return True
     
-    def has_reproduced(self) -> bool:
+    def can_have_twins(self) -> bool:
+        """Sprawdza, czy zwierzę może mieć bliźniaki"""
+        if self.can_have_child() and randint(0, 50) == 1:
+            return True
+        return False
+    
+    def can_have_triplets(self) -> bool:
+        if self.can_have_twins() and randint(0, 10) == 1:
+            return True
+        return False
+    
+    def has_reproduced(self) -> int:
         """Sprawdza, czy zwierzę się już rozmnożyło"""
         return self.__reproduced
-    
+
     def reproduce(self) -> None:
         """Zaznacza, że zwierze się rozmnożyło"""
-        self.__reproduced = True
+        self.__reproduced += 1
     
     def set_age(self, age: int) -> None:
         """Ustawia wiek zwierzęcia
@@ -138,14 +164,8 @@ class Animal(Object):
         if type(self).__name__ == type(partner).__name__:
             if self.get_gender() != partner.get_gender():
                 if self.get_hit_points() > 0 and partner.get_hit_points() > 0:
-                    if self.get_age() >= 5 and partner.get_age() >= 5:
-                        if type(self).__name__ == "Predator":
-                            if self.get_gender() == GENDER_MALE and not partner.has_reproduced():
-                                return True
-                            elif not self.has_reproduced():
-                                return True
-                        elif not self.has_reproduced():
-                            return True
+                    if self.can_have_child() and partner.can_have_child():
+                        return True
 
         return False
 

@@ -9,4 +9,6 @@ logs/*
 *.log
 *.pyc
 */__pycache__/*
-
+csv/*
+graphs/*
+```

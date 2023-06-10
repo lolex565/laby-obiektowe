@@ -4,6 +4,7 @@ from ecosystem_simulation import Board, BoardSize
 from ecosystem_simulation.objects.animals import *
 from ecosystem_simulation.objects.animals.preys import *
 from ecosystem_simulation.objects.animals.predators import *
+from ecosystem_simulation.utils import *
 
 
 if __name__ == "__main__":
@@ -13,15 +14,17 @@ if __name__ == "__main__":
     predators_num = min(int(input("Podaj liczbę drapieżników: ")), 500)
     preys_num = min(int(input("Podaj liczbę ofiar: ")), 600)
     beavers_num = min(int(input("Podaj liczbę bobrów: ")), 400)
+    max_pop = min(int(input("Podaj maksymalną liczbę zwierząt na planszy(zalecany 600 maksymalnie): ")), 3000)
 
     items_num = min(int(input("Podaj liczbę obiektów nieożywionych: ")), 1000)
     time.sleep(min((float(input("podaj minimalny czas między turami w ms: ")) / 1000), 0.01))
+    max_turns = min(int(input("Podaj maksymalną liczbę tur (domyślnie maksymalnie 10 tysięcy tur): ")), 10000)
 
     print("Przygotowywanie symulacji...")
 
     # tworzymy planszę
     print("Tworzenie planszy...")
-    board = Board(BoardSize(width, height))
+    board = Board(BoardSize(width, height), max_pop, max_turns)
 
     # dodajemy zwierzęta
 
@@ -67,3 +70,14 @@ if __name__ == "__main__":
             print(f"Przyczyna zakończenia symulacji: {end}")
     except KeyboardInterrupt:
         print("Przerwano symulację")
+
+    choice_csv = input("Czy chcesz zapisać wyniki do pliku csv? [t/n]: ")
+    if choice_csv.lower() == "t":
+        time_of_creation = time.strftime("%Y-%m-%d_%H-%M-%S")
+        create_csv_file(f'wyniki_{time_of_creation}.csv', board.get_pop_data())
+        print(f'Plik csv został zapisany jako csv/wyniki_{time_of_creation}.csv')
+        choice_graph = input("Czy chcesz utworzyć wykresy z wyników? [t/n]: ")
+        if choice_graph.lower() == "t":
+            create_graphs(f'wyniki_{time_of_creation}')
+            print(f'Wykresy zostały zapisane w folderze graphs/wyniki_{time_of_creation}')
+

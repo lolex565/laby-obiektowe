@@ -1,4 +1,5 @@
 import sys
+from random import randint
 
 sys.path.append('../..')
 
@@ -65,6 +66,27 @@ class Predator(Animal):
         satiety += int(prey.get_weight())
         self.set_satiety(max(satiety, 100))
         self.__anger -= int(prey.get_weight()) % 100
+
+    def can_have_child(self) -> bool:
+        """Sprawdza, czy zwierzę może mieć potomka"""
+        if self.get_age() < 5:
+            return False
+        if self.get_satiety() < 30:
+            return False
+        if self.get_thirst() < 30:
+            return False
+        return True
+
+    def can_have_twins(self) -> bool:
+        """Sprawdza, czy zwierzę może mieć bliźniaki"""
+        if self.can_have_child() and randint(0, 30) == 1:
+            return True
+        return False
+
+    def can_have_triplets(self) -> bool:
+        if self.can_have_twins() and randint(0, 10) == 1:
+            return True
+        return False
 
 
 class Wolf(Predator):

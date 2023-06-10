@@ -1,6 +1,7 @@
 from random import randint, choice, uniform
 import math, logging, time
 
+from .objects import Object
 from .objects.items import *
 from .objects.animals import *
 from .objects.animals.beaver import Beaver
@@ -34,6 +35,7 @@ class BoardSize:
         :return: powierzchnia planszy
         """
         return self.__width * self.__height
+
     
 
 class Board:
@@ -44,10 +46,16 @@ class Board:
     __predators = 0           # liczba drapieżników
     __preys = 0               # liczba ofiar
     __beavers = 0             # liczba bobrów
+    __plants = 0              # liczba roślin
+    __trees = 0               # liczba drzew
+    __waters = 0              # liczba wód
     __grid = []               # siatka planszy
     __objects = set()         # zbiór wszystkich obiektów
     __round = 0               # tura
     __size = None             # rozmiar planszy
+    __max_pop = 1000          # maksymalna liczba zwierząt na planszy
+    __max_turns = 10000        # maksymalna liczba tur
+    __pop_data = []           # dane o populacji w czasie
 
     # możliwe zwierzęta
     __possible_animals = {
@@ -66,15 +74,18 @@ class Board:
         "Water": Water
     }
 
-    def __init__(self, size: BoardSize) -> None:
+    def __init__(self, size: BoardSize, max_pop: int, max_turns: int) -> None:
         """Konstruktor klasy Board
 
         :param size: rozmiar planszy
+        :param max_pop: maksymalna liczba zwierząt na planszy
+        :param max_turns: maksymalna liczba tur
         """
         self.__size = size
         self.__grid = [[None for _ in range(self.__size.get_size()[0])] for _ in range(self.__size.get_size()[1])]
-
-        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s', filename='logs/simulation_%s.log' % time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime()), filemode='a')
+        self.__max_pop = max_pop
+        self.__max_turns = max_turns
+        logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s', filename='logs/simulation_%s.log' % time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime()), filemode='a')
 
     def __str__(self) -> str:
         """Zwraca planszę w postaci stringa"""
@@ -95,6 +106,10 @@ class Board:
     def get_area(self) -> int:
         """Zwraca powierzchnię planszy"""
         return self.__size.get_area()
+
+    def get_max_pop(self) -> int:
+        """Zwraca maksymalną liczbę zwierząt na planszy"""
+        return self.__max_pop
     
     def get_total_object_count(self) -> int:
         """Zwraca liczbę wszystkich obiektów"""
@@ -115,6 +130,18 @@ class Board:
     def get_beavers(self) -> int:
         """Zwraca liczbę bobrów"""
         return self.__beavers
+
+    def get_plants(self) -> int:
+        """Zwraca liczbę roślin"""
+        return self.__plants
+
+    def get_trees(self) -> int:
+        """Zwraca liczbę drzew"""
+        return self.__trees
+
+    def get_waters(self) -> int:
+        """Zwraca liczbę wód"""
+        return self.__waters
     
     def __set_grid(self) -> None:
         """Ustawia planszę"""
@@ -134,6 +161,23 @@ class Board:
     def get_round(self) -> int:
         """Zwraca numer rundy"""
         return self.__round
+
+    def get_pop_data(self) -> list:
+        """Zwraca dane o populacji w czasie"""
+        return self.__pop_data
+
+    def append_pop_data(self) -> None:
+        """Dodaje dane o populacji w czasie"""
+        row =[]
+        row.append(self.get_round())
+        row.append(self.get_population())
+        row.append(self.get_predators())
+        row.append(self.get_preys())
+        row.append(self.get_beavers())
+        row.append(self.get_plants())
+        row.append(self.get_trees())
+        row.append(self.get_waters())
+        self.__pop_data.append(row)
     
     def add_random_object(self) -> None:
         """Dodaje losowy obiekt"""
@@ -198,6 +242,12 @@ class Board:
             durability=randint(1, 50),
         )
 
+        if issubclass(item.__class__, Plant):
+            self.__plants += 1
+        if issubclass(item.__class__, Tree):
+            self.__trees += 1
+        if issubclass(item.__class__, Water):
+            self.__waters += 1
         self.__objects.add(item)
         self.__total_object_count += 1
 
@@ -263,8 +313,18 @@ class Board:
                 self.__preys = max(self.__preys, 0)
                 self.__population -= 1
         if isinstance(obj, Beaver):
-            self.__population -= 1
             self.__beavers -= 1
+            self.__beavers = max(self.__beavers, 0)
+            self.__population -= 1
+        if isinstance(obj, Plant):
+            self.__plants -= 1
+            self.__plants = max(self.__plants, 0)
+        if isinstance(obj, Tree):
+            self.__trees -= 1
+            self.__trees = max(self.__trees, 0)
+        if isinstance(obj, Water):
+            self.__waters -= 1
+            self.__waters = max(self.__waters, 0)
         self.__total_object_count -= 1
         self.__population = max(self.__population, 0)
         del obj
@@ -322,13 +382,45 @@ class Board:
         self.__round += 1  # zwiększamy licznik rund
         self.__set_grid()  # ustawiamy siatkę
 
+
         # aktualizujemy stan obiektów
         for obj in list(self.__objects):
             if obj not in self.__objects:
                 # jeśli obiekt został usunięty, pomijamy go
                 continue
+
             if issubclass(obj.__class__, Animal):
                 # jeśli obiekt jest zwierzęciem, aktualizujemy jego stan
+                if issubclass(obj.__class__, Predator):
+                    if obj.get_age() >= randint(40, 100) and randint(0, 1000) == 1:
+                        self.remove(obj)
+                        logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has died of old age: {obj.get_age()} ]')
+                        continue
+                    if 0.8 * self.get_preys() <= self.get_predators() and randint(0, 100) == 1:
+                        self.remove(obj)
+                        logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has died breaking a leg while hunting ]')
+                        continue
+                elif issubclass(obj.__class__, Prey):
+                    if randint(0, 1000) == 1:
+                        self.remove(obj)
+                        logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has died of fatal indigestion ]')
+                        continue
+                    if self.get_preys() >= 2*self.get_predators():
+                        if obj.get_age() >= randint(30, 100) and randint(0, 10) == 1:
+                            self.remove(obj)
+                            logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has died of old age: {obj.get_age()} ]')
+                            continue
+                    else:
+                        if obj.get_age() >= randint(30, 100) and randint(0, 100) == 1:
+                            self.remove(obj)
+                            logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has died of old age: {obj.get_age()} ]')
+                            continue
+
+                elif issubclass(obj.__class__, Beaver):
+                    if obj.get_age() >= randint(15, 20) and randint(0, 100) == 1:
+                        logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has died of old age: {obj.get_age()} ]')
+                        continue
+
                 x, y = obj.get_position()
                 if obj.get_hit_points() <= 0:
                     # jeśli zwierzę nie ma już punktów życia, usuwamy go
@@ -371,7 +463,7 @@ class Board:
                             x, y = self.__correct_position(x, y)
                             logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} runs away from {type(object_nearby).__name__}{object_nearby.get_position()} ]')
                         break
-                    elif issubclass(obj.__class__, Predator) and issubclass(object_nearby.__class__, Prey):
+                    elif issubclass(obj.__class__, Predator) and issubclass(object_nearby.__class__, Prey) and obj.get_satiety() < 70:
                         # jeśli obiekt jest drapieżnikiem, a obiekt w zasięgu widzenia jest ofiarą, atakujemy
                         if obj.get_position() == object_nearby.get_position():
                             if object_nearby.get_hit_points() <= 0:
@@ -429,14 +521,33 @@ class Board:
                             # poruszamy się w kierunku wody
                             x, y = self.__move_towards_object(obj, object_nearby)
                         break
-                    # jeśli obiekt jest tego samego typu, próbujemy się rozmnożyć
+                    # jeśli obiekt jest tego samego typu oraz maksymalna populacja na to pozwala, próbujemy się rozmnożyć
                     elif obj.can_reproduce_with(object_nearby):
+                        if self.get_population() >= self.get_max_pop():
+                            break
                         if obj.get_position() == object_nearby.get_position():
-                            obj.reproduce()
-                            object_nearby.reproduce()
-                            self.populate(obj)
-                            logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has reproduced with {type(object_nearby).__name__}{object_nearby.get_position()} ]')
-                            x, y = move_away_from_point(*obj.get_position(), *object_nearby.get_position(), obj.get_speed())
+                            if obj.can_have_triplets() or object_nearby.can_have_triplets():
+                                self.populate(obj)
+                                self.populate(obj)
+                                self.populate(obj)
+                                logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has reproduced with {type(object_nearby).__name__}{object_nearby.get_position()} and had triplets ]')
+                            elif obj.can_have_twins() or object_nearby.can_have_twins():
+                                self.populate(obj)
+                                self.populate(obj)
+                                logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has reproduced with {type(object_nearby).__name__}{object_nearby.get_position()} and had twins ]')
+                            else:
+                                self.populate(obj)
+                                logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has reproduced with {type(object_nearby).__name__}{object_nearby.get_position()} ]')
+                            if randint(0, 100) == 1:
+                                if obj.get_gender() == GENDER_FEMALE:
+                                    self.remove(obj)
+                                    logging.info(f'[ Round {self.get_round()}: {type(obj).__name__}{obj.get_position()} has died giving birth ]')
+                                    continue
+                                else:
+                                    self.remove(object_nearby)
+                                    logging.info(f'[ Round {self.get_round()}: {type(object_nearby).__name__}{object_nearby.get_position()} has died giving birth ]')
+                                    continue
+                            x, y = move_away_from_point(*obj.get_position(), *object_nearby.get_position(), int(obj.get_speed()))
                             x, y = self.__correct_position(x, y)
                         else:
                             # poruszamy się w kierunku partnera
@@ -445,7 +556,7 @@ class Board:
                 else:
                     # jeśli nie znaleziono żadnego obiektu w zasięgu widzenia, losowo poruszamy się po mapie
                     x, y = randint(1, self.__size.get_size()[0] - 1), randint(1, self.__size.get_size()[1] - 1)
-                    x, y = move_towards_point(*obj.get_position(), x, y, obj.get_speed())
+                    x, y = move_towards_point(*obj.get_position(), x, y, int(obj.get_speed()))
                     x, y = self.__correct_position(x, y)
 
                 # zwiększamy wiek zwierzęcia i poruszamy się
@@ -466,7 +577,11 @@ class Board:
         - liczba ofiar jest równa 0
         - liczba drapieżników jest równa 0
         - cała populacja jest równa 0
+        - liczba rund jest równa maksymalnej liczbie rund
         """
+
+        self.append_pop_data()
+
         if self.__population <= 0:
             logging.info(f'[ Round {self.get_round()}: Simulation has ended - All animals have died ]')
             return "Wszystkie zwierzęta umarły"
@@ -476,4 +591,7 @@ class Board:
         if self.__preys <= 0:
             logging.info(f'[ Round {self.get_round()}: Simulation has ended - All preys have died ]')
             return "Wszystkie ofiary umarły"
+        if self.get_round() >= self.__max_turns:
+            logging.info(f'[ Round {self.get_round()}: Simulation has ended - Maximum number of rounds reached ]')
+            return "Osiągnięto maksymalną liczbę rund"
         return False
