@@ -36,7 +36,7 @@ Najpierw należy sklonować repozytorium:
 git clone https://github.com/lolex565/laby-obiektowe.git
 ```
 
-A nstępnie zainstalować niezbędne biblioteki:
+A następnie zainstalować niezbędne biblioteki:
 
 ```
 pip install -r requirements.txt
@@ -54,4 +54,13 @@ chmod +x *.sh
 
 ```
 ./run.sh
+```
+Program testowany był jedynie na systemie Linux i macos, które mają wbudowaną powłokę bash, jednak do uruchomienia programu w systemie windows najprościej będzie użyć narzędzia [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
+
+Wtedy należy wykonać te same kroki co w przypadku systemu Linux.
+
+Alternatywnym sposobem uruchomienia programu jest uruchomienie skryptu `main.py` bezpośrednio z wiersza poleceń systemu windows(jednak trzeba upewnić się co do istnienia folderu logs, graphs i csv):
+
+```
+python3 main.py
 ```
