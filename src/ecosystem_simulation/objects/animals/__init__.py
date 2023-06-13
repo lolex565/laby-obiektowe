@@ -72,6 +72,7 @@ class Animal(Object):
         return False
     
     def can_have_triplets(self) -> bool:
+        """Sprawdza, czy zwierzę może mieć trojaczki"""
         if self.can_have_twins() and randint(0, 10) == 1:
             return True
         return False
