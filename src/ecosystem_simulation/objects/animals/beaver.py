@@ -22,6 +22,8 @@ class Beaver(Animal):
         
         :param tree: drzewo
         """
+        if self.__teeth_durability <= 0:
+            return
         self.set_satiety((tree.get_weight() * tree.get_energy()) % 100)
         self.__teeth_durability -= tree.get_durability() // 100
 
