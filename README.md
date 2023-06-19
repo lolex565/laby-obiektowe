@@ -21,7 +21,7 @@ Zwierzęta będą mogły się poruszać po mapie.
 Zwierzęta będą mogły jeść.
 Zwierzęta będą mogły pić.
 
-## Aktualnie zaimplementowane funkcjonalności
+## Zaimplementowane funkcjonalności
 - stworzenie mapy (grid 2D)
 - stworzenie zwierząt
 - stworzenie drzew, wody, jedzenia
@@ -36,7 +36,7 @@ Najpierw należy sklonować repozytorium:
 git clone https://github.com/lolex565/laby-obiektowe.git
 ```
 
-A następnie zainstalować niezbędne biblioteki:
+A nstępnie zainstalować niezbędne biblioteki:
 
 ```
 pip install -r requirements.txt
@@ -55,12 +55,85 @@ chmod +x *.sh
 ```
 ./run.sh
 ```
-Program testowany był jedynie na systemie Linux i macos, które mają wbudowaną powłokę bash, jednak do uruchomienia programu w systemie windows najprościej będzie użyć narzędzia [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 
-Wtedy należy wykonać te same kroki co w przypadku systemu Linux.
+> Aplikacja była testowana na systemach Linux oraz macOS. Nie była uruchamiana na systemie Windows.
 
-Alternatywnym sposobem uruchomienia programu jest uruchomienie skryptu `main.py` bezpośrednio z wiersza poleceń systemu windows(jednak trzeba upewnić się co do istnienia folderu logs, graphs i csv):
+## Skrypty bash
+
+- `run.sh` - uruchamia symulację
+- `test.sh` - uruchamia testy jednostkowe
+- `generate_doc.sh` - generuje dokumentację w postaci plików `*.html` na podstawie komentarzy w kodzie
+- `clean_pycache.sh` - usuwa foldery `__pycache__`
+
+## Struktura projektu
 
 ```
-python3 main.py
+projekt-laby
+├── clean_pycache.sh
+├── csv
+│   └── wyniki_2023-06-10_18-04-29.csv
+├── doc
+│   ├── ecosystem_simulation.html
+│   ├── ecosystem_simulation.objects.animals.beaver.html
+│   ├── ecosystem_simulation.objects.animals.html
+│   ├── ecosystem_simulation.objects.animals.predators.html
+│   ├── ecosystem_simulation.objects.animals.preys.html
+│   ├── ecosystem_simulation.objects.html
+│   ├── ecosystem_simulation.objects.items.html
+│   └── ecosystem_simulation.utils.html
+├── generate_doc.sh
+├── graphs
+│   └── wyniki_2023-06-10_18-04-29
+│       ├── beaversAndTrees.png
+│       ├── populationAndWater.png
+│       ├── population.png
+│       ├── predatorAndPrey.png
+│       └── preysAndPlants.png
+├── logs
+│   ├── simulation_2023-06-07_19.log
+│   ├── simulation_2023-06-07_20.log
+│   ├── simulation_2023-06-10_18-02-34.log
+│   └── simulation_2023-06-10_18-12-12.log
+├── README.md
+├── requirements.txt
+├── run.sh
+├── src
+│   ├── ecosystem_simulation
+│   │   ├── __init__.py
+│   │   ├── objects
+│   │   │   ├── animals
+│   │   │   │   ├── beaver.py
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── predators.py
+│   │   │   │   └── preys.py
+│   │   │   ├── __init__.py
+│   │   │   └── items
+│   │   │       └── __init__.py
+│   │   └── utils.py
+│   └── main.py
+├── tests
+│   ├── animal_tests.py
+│   └── __init__.py
+├── test.sh
 ```
+
+## Dokumentacja
+
+Dokumentacja znajduje się w folderze `doc`. Są to pliki `*.html` wygenerowane za pomocą skryptu `generate_doc.sh`, który wkorzystuje narzędzie [`pydoc`](https://docs.python.org/3/library/pydoc.html).
+
+## Diagramy UML z etapu III
+
+Poniżej są przedstawione diagramy UML utworzone na potrzeby kroku milowego III.
+
+> W finalnej wersji projektu kod aplikacji został wzbogadzony o więcej metod niż te przewidywane w poprzednich etapach.
+
+### Diagram klas
+
+![diagram klas](images/Projekt_PO_Ekosystem_klasy.png)
+
+### Diagram obiektów
+
+![diagram obiektów](images/Projekt_PO_Ekosystem_obiekty.png)
+
+
+## Przykłady symulacji
