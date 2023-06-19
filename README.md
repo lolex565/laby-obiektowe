@@ -60,10 +60,10 @@ chmod +x *.sh
 
 ## Skrypty bash
 
-- `run.sh` - uruchamia symulację
-- `test.sh` - uruchamia testy jednostkowe
-- `generate_doc.sh` - generuje dokumentację w postaci plików `*.html` na podstawie komentarzy w kodzie
-- `clean_pycache.sh` - usuwa foldery `__pycache__`
+- [`run.sh`](run.sh) - uruchamia symulację
+- [`test.sh`](test.sh) - uruchamia testy jednostkowe
+- [`generate_doc.sh`](generate_doc.sh) - generuje dokumentację w postaci plików `*.html` na podstawie komentarzy w kodzie
+- [`clean_pycache.sh`](clean_pycache.sh) - usuwa foldery `__pycache__`
 
 ## Struktura projektu
 
