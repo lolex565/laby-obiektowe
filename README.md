@@ -64,3 +64,19 @@ Alternatywnym sposobem uruchomienia programu jest uruchomienie skryptu `main.py`
 ```
 python3 main.py
 ```
+
+## Przykładowe wykresy
+
+![Wykres 1](example_graphs/population.png)
+
+![Wykres 2](example_graphs/populationAndWater.png)
+
+![Wykres 3](example_graphs/predatorAndPrey.png)
+
+![Wykres 4](example_graphs/preysAndPlants.png)
+
+![Wykres 5](example_graphs/beaversAndTrees.png)
+
+## Przykładowy przebieg symulacji
+
+![Przebieg symulacji](example_simulation.gif)
