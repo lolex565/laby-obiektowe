@@ -30,13 +30,13 @@ Zwierzęta będą mogły pić.
 
 ## Sposób uruchomienia
 
-Najpierw należy sklonować repozytorium:
+Najpierw należy sklonować repozytorium z serwisu [GitHub](https://github.com/lolex565/laby-obiektowe):
 
 ```
 git clone https://github.com/lolex565/laby-obiektowe.git
 ```
 
-A następnie zainstalować niezbędne biblioteki:
+A następnie zainstalować niezbędne biblioteki korzystając z instalatora pakietów [`pip`](https://pip.pypa.io/en/stable/):
 
 ```
 pip install -r requirements.txt
@@ -131,12 +131,13 @@ Poniżej są przedstawione diagramy UML utworzone na potrzeby kroku milowego III
 
 ![diagram klas](images/Projekt_PO_Ekosystem_klasy.png)
 
-![poszerzony diagram klas](diagram_UML.png)
-
 ### Diagram obiektów
 
 ![diagram obiektów](images/Projekt_PO_Ekosystem_obiekty.png)
 
+## Uaktualniony diagram klas
+
+![poszerzony diagram klas](images/diagram_UML.png)
 
 ## Przykładowe wykresy
 
@@ -152,4 +153,4 @@ Poniżej są przedstawione diagramy UML utworzone na potrzeby kroku milowego III
 
 ## Przykładowy przebieg symulacji
 
-![Przebieg symulacji](example_simulation.gif)
+![Przebieg symulacji](images/example_simulation.gif)
